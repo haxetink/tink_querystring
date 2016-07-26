@@ -13,7 +13,7 @@ abstract Pairs<T>(Iterator<Named<T>>) from Iterator<Named<T>> to Iterator<Named<
   
   
   @:from static function portions(s:String):Pairs<Portion>
-    return Query.parseString(s);
+    return (Query.parseString(s) : Iterator<Named<Portion>>);
     
   @:from static function portionsOfUrl(u:Url):Pairs<Portion>
     return portions(u.query);

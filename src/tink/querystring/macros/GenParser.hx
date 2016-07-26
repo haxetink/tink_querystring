@@ -82,14 +82,18 @@ class GenParser {
     this._int =
       if ((macro ((null:$value):Int)).typeof().isSuccess())
         prim(macro : Int);
+      else if ((macro ((null:$value):tink.querystring.Stringly)).typeof().isSuccess())
+        macro (${prim(macro : Stringly)} : Int);
       else
-        macro this.parseInt($ { prim(macro : String) } );
+        macro ((${prim(macro : String)} : Stringly) : Int);
         
     this._float =
       if ((macro ((null:$value):Float)).typeof().isSuccess())
         prim(macro : Float);
+      else if ((macro ((null:$value):tink.querystring.Stringly)).typeof().isSuccess())
+        macro (${prim(macro : Stringly)} : Float);
       else
-        macro this.parseFloat(${prim(macro : String)});
+        macro ((${prim(macro : String)} : Stringly) : Float);
   }
   
   public function get() {
