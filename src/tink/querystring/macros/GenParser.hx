@@ -17,29 +17,62 @@ class GenParser {
   
   var valueType:Type;
   var resultType:Type;
-  var keyType:Type;
+  var inputType:Type;
   
   var value:ComplexType;
   var result:ComplexType;
-  var key:ComplexType;
+  var input:ComplexType;
   
   var pos:Position;
   var _int:Expr;
   var _float:Expr;
   var _string:Expr;
   
-  function new(name, keyType, valueType, resultType, pos) {
+  function new(name, rawType:Type, pos) {
+    
     this.pos = pos;
     this.name = name;
+    //keyType, valueType, 
     
-    this.valueType = valueType;
-    this.resultType = resultType;
-    this.keyType = keyType;
     
-    this.value = valueType.toComplex();
+    this.resultType = 
+      switch rawType.reduce() {
+        case TFun([{ t: input }, { t: value }], result):
+          
+          this.inputType = input;
+          this.valueType = value;
+          
+          result;
+          
+        case TFun([{ t: value }], result):
+          
+          this.valueType = value;
+          
+          result;
+          
+        case result: 
+                    
+          result;
+      }
+      
     this.result = resultType.toComplex();
-    this.key = keyType.toComplex();
-    
+      
+    if (this.value == null) {
+      if (this.valueType == null) {
+        this.value = macro : tink.url.Portion;
+        this.valueType = value.toType(pos).sure();
+      }
+      else this.value = this.valueType.toComplex();
+    }
+      
+    if (this.input == null) {
+      if (this.inputType == null) {
+        this.input = macro : tink.querystring.Pairs<$value>;
+        this.inputType = input.toType(pos).sure();
+      }
+      else this.input = this.inputType.toComplex();
+    }
+        
     this._string = 
       if ((macro ((null:$value):String)).typeof().isSuccess()) 
         prim(macro : String);
@@ -62,27 +95,51 @@ class GenParser {
   public function get() {
     var crawl = Crawler.crawl(resultType, pos, this);
     
-    var ret = macro class $name extends tink.querystring.Parser.ParserBase<$key, $value, $result> {
+    var ret = macro class $name extends tink.querystring.Parser.ParserBase<$input, $value, $result> {
       
-      override function doParse() {
+      function getName(p):String return p.name;
+      function getValue(p):$value return p.value;
+      
+      override public function parse(input:$input) {
         var prefix = '';
+        this.init(input, getName, getValue);
         return ${crawl.expr};
       }
       
-      override function keyToString(key:$key):String
-        return key;
     }
     
     ret.fields = ret.fields.concat(crawl.fields);
     
     return ret;    
   }
-
-  static function buildNew(ctx:BuildContext3) 
-    return new GenParser(ctx.name, ctx.type, ctx.type2, ctx.type3, ctx.pos).get();    
   
-  static public function build() 
-    return BuildCache.getType3('tink.querystring.Parser', buildNew);
+  //static function decompose(type:Type) 
+    //return switch type.reduce() {
+      //case TFun([input], result):
+        //
+        //{ input: input, result: result };
+        //
+      //case TFun(v, _):
+        //
+        //Context.currentPos().error('Can define input and result type, but not more');
+        //
+      //case v:
+        //
+        //{ input: (macro : tink.querystring.Pairs<tink.url.Portion>).toType().sure(), result: v };
+    //}
+
+  static function buildNew(ctx:BuildContext) 
+    return new GenParser(ctx.name, ctx.type, ctx.pos).get();    
+  
+  static public function build() {
+    return BuildCache.getType('tink.querystring.Parser', buildNew);
+    //return switch Context.getCallArguments() {
+      //case null:
+        //decompose()
+      //case v:
+        //
+    //}
+  }
     
   public function args():Array<String> 
     return ['prefix'];

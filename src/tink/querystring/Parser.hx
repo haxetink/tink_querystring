@@ -5,11 +5,11 @@ import tink.core.Error.Pos;
 using tink.CoreApi;
 
 @:genericBuild(tink.querystring.macros.GenParser.build())
-class Parser<Result> {
+class Parser<Flow> {
   
 }
 
-class ParserBase<Value, Result> { 
+class ParserBase<Input, Value, Result> { 
   
   var params:Map<String, Value>;
   var exists:Map<String, Bool>;
@@ -18,15 +18,17 @@ class ParserBase<Value, Result> {
   
   public var result(default, null):Outcome<Result, Error>;
   
-  public function new<A>(input:Input<A>, name:A->String, value:A->Value, ?onError, ?pos) {     
-    this.pos = pos;
-    this.params = new Map();
-    this.exists = new Map();
-    
+  public function new(?onError, ?pos) {     
+    this.pos = pos;    
     this.onError = switch onError {
       case null: abort;
       case v: v;
     }
+  }
+  
+  function init<A>(input:Iterator<A>, name:A->String, value:A->Value) {
+    this.params = new Map();
+    this.exists = new Map();
     
     if (input != null) {
       for (pair in input) {
@@ -48,19 +50,20 @@ class ParserBase<Value, Result> {
           }
         }
       }
-    }
-    
-    this.result = 
-      try Success(parse())
-      catch (e:Error) Failure(e)
-      catch (e:Dynamic) Failure(error('Parse Error', e));
+    }    
   }
  
   static function abort(e:Error)
     throw e;
-  
-  function parse():Result 
+
+  public function parse(input:Input):Result 
     return throw Error.withData(NotImplemented, 'not implemented', pos);
+    
+  public function tryParse(input)
+    return 
+      try Success(parse(input))
+      catch (e:Error) Failure(e)
+      catch (e:Dynamic) Failure(error('Parse Error', e));
     
   function error(reason:String, ?data:Dynamic)
     return Error.withData(UnprocessableEntity, reason, data, pos);
