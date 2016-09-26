@@ -10,7 +10,7 @@ class Run {
   function new() {}
   static var tests:Array<TestCase> = [
     new QueryParserTest(),
-    //new QueryComposerTest(),
+    new QueryBuilderTest(),
   ];
   static function main() {  
     

@@ -5,13 +5,11 @@ import tink.core.Error.Pos;
 using tink.CoreApi;
 
 @:genericBuild(tink.querystring.macros.GenParser.build())
-class Parser<Flow> {
-  
-}
+class Parser<Flow> {}
 
 class ParserBase<Input, Value, Result> { 
   
-  var params:Map<String, Value>;
+  var params:Map<String, Value>;//TODO: consider storing a true hierarchy
   var exists:Map<String, Bool>;
   var onError:Error->Void;
   var pos:Pos;
@@ -30,7 +28,7 @@ class ParserBase<Input, Value, Result> {
     this.params = new Map();
     this.exists = new Map();
     
-    if (input != null) {
+    if (input != null) 
       for (pair in input) {
         var name = name(pair);
         params[name] = value(pair);
@@ -50,7 +48,7 @@ class ParserBase<Input, Value, Result> {
           }
         }
       }
-    }    
+        
   }
  
   static function abort(e:Error)

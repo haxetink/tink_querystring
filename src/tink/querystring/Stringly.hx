@@ -1,8 +1,21 @@
 package tink.querystring;
+import tink.url.Portion;
 
 using tink.CoreApi;
 using StringTools;
 
+/**
+ * This particular abstract brings stringliness to Haxe. It is a mess. In particular bools make me cry. 
+ * And also some of the code in GenParser is music to the pharyngeal reflex.
+ * 
+ * Stringliness is a neat idea to allow easily expressing numeric values in human machine interaction, 
+ * which leverages the fact that our brains are pretty good at finding out whether something is a number or not. 
+ * Computers, however, are not good at processing complex language. They are getting there, but even then they will
+ * still be orders of magnitude faster and more reliable when dealing with more rigid representations.
+ * 
+ * Therefore stringliness should exist only at the periphery of any computer system and not at its very core as it does in the web.
+ * But the facts of life are sometimes inescapable and so we must deal with them as best we can.
+ */
 abstract Stringly(String) from String to String {
    
   static function isNumber(s:String, allowFloat:Bool) {
@@ -12,8 +25,11 @@ abstract Stringly(String) from String to String {
     var pos = 0,
         max = s.length;
         
+    inline function isDigit(code)
+      return code ^ 0x30 < 10;//a sharp glimpse at the ASCII table revealed this to me
+        
     inline function digits()
-      while (pos < max && s.fastCodeAt(pos) ^ 0x30 < 10) pos++;//also not too pretty, but leads to compact code
+      while (pos < max && isDigit(s.fastCodeAt(pos))) pos++;
     
     inline function allow(code)
       return 
@@ -76,5 +92,8 @@ abstract Stringly(String) from String to String {
     
   @:from static inline function ofFloat(f:Float):Stringly
     return Std.string(f);
+    
+  @:from static inline function ofPortion(p:Portion):Stringly
+    return p.toString();
     
 }

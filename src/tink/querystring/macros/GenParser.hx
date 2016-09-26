@@ -27,14 +27,12 @@ class GenParser {
   var _int:Expr;
   var _float:Expr;
   var _string:Expr;
+  var _bool:Expr;
   
   function new(name, rawType:Type, pos) {
     
     this.pos = pos;
     this.name = name;
-    //keyType, valueType, 
-    
-    
     this.resultType = 
       switch rawType.reduce() {
         case TFun([{ t: input }, { t: value }], result):
@@ -56,7 +54,8 @@ class GenParser {
       }
       
     this.result = resultType.toComplex();
-      
+    
+    
     if (this.value == null) {
       if (this.valueType == null) {
         this.value = macro : tink.url.Portion;
@@ -72,7 +71,8 @@ class GenParser {
       }
       else this.input = this.inputType.toComplex();
     }
-        
+    
+    //Now comes the sad part - see tink.querystring.Stringly for further rants ...
     this._string = 
       if ((macro ((null:$value):String)).typeof().isSuccess()) 
         prim(macro : String);
@@ -94,6 +94,14 @@ class GenParser {
         macro (${prim(macro : Stringly)} : Float);
       else
         macro ((${prim(macro : String)} : Stringly) : Float);
+        
+    this._bool =
+      if ((macro ((null:$value):Bool)).typeof().isSuccess())
+        prim(macro : Int);
+      else if ((macro ((null:$value):tink.querystring.Stringly)).typeof().isSuccess())
+        macro (${prim(macro : Stringly)} : Bool);
+      else
+        macro ((${prim(macro : String)} : Stringly) : Bool);
   }
   
   public function get() {
@@ -116,34 +124,12 @@ class GenParser {
     
     return ret;    
   }
-  
-  //static function decompose(type:Type) 
-    //return switch type.reduce() {
-      //case TFun([input], result):
-        //
-        //{ input: input, result: result };
-        //
-      //case TFun(v, _):
-        //
-        //Context.currentPos().error('Can define input and result type, but not more');
-        //
-      //case v:
-        //
-        //{ input: (macro : tink.querystring.Pairs<tink.url.Portion>).toType().sure(), result: v };
-    //}
 
   static function buildNew(ctx:BuildContext) 
     return new GenParser(ctx.name, ctx.type, ctx.pos).get();    
   
-  static public function build() {
+  static public function build() 
     return BuildCache.getType('tink.querystring.Parser', buildNew);
-    //return switch Context.getCallArguments() {
-      //case null:
-        //decompose()
-      //case v:
-        //
-    //}
-  }
     
   public function args():Array<String> 
     return ['prefix'];
@@ -169,15 +155,15 @@ class GenParser {
   public function int():Expr 
     return _int;
     
-  public function dyn(e:Expr, ct:ComplexType):Expr {
+  public function dyn(e:Expr, ct:ComplexType):Expr 
     return throw "not implemented";
-  }
-  public function dynAccess(e:Expr):Expr {
+  
+  public function dynAccess(e:Expr):Expr 
     return throw "not implemented";
-  }
-  public function bool():Expr {
-    return macro (${string()}) == 'true';
-  }
+  
+  public function bool():Expr 
+    return _bool;
+  
   public function date():Expr {
     return throw "not implemented";
   }
