@@ -50,6 +50,12 @@ parser.parse('title=Example+Post&body=This+is+an+example&tags[0]=foo&tags[1]=bar
 
 ## Simple Building
 
+Building querystrings is even simpler (since there's no error handling to be taken care of and the structure of the data is already well defined by the type of the data):
 
+```haxe
+trace(tink.QueryString.build({ hello:'world', blabla: [1,2,3] }));//blabla[0]=1&blabla[1]=2&blabla[2]=3&hello=world
+```
 
 ## Builder Details
+
+... to be documented
