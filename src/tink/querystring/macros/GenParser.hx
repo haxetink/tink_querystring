@@ -72,7 +72,7 @@ class GenParser {
       else this.input = this.inputType.toComplex();
     }
     
-    //Now comes the sad part - see tink.querystring.Stringly for further rants ...
+    //Now comes the sad part - see tink.querystring.tink.Stringly for further rants ...
     this._string = 
       if ((macro ((null:$value):String)).typeof().isSuccess()) 
         prim(macro : String);
@@ -82,26 +82,26 @@ class GenParser {
     this._int =
       if ((macro ((null:$value):Int)).typeof().isSuccess())
         prim(macro : Int);
-      else if ((macro ((null:$value):tink.querystring.Stringly)).typeof().isSuccess())
-        macro (${prim(macro : Stringly)} : Int);
+      else if ((macro ((null:$value):tink.Stringly)).typeof().isSuccess())
+        macro (${prim(macro : tink.Stringly)} : Int);
       else
-        macro ((${prim(macro : String)} : Stringly) : Int);
+        macro ((${prim(macro : String)} : tink.Stringly) : Int);
         
     this._float =
       if ((macro ((null:$value):Float)).typeof().isSuccess())
         prim(macro : Float);
-      else if ((macro ((null:$value):tink.querystring.Stringly)).typeof().isSuccess())
-        macro (${prim(macro : Stringly)} : Float);
+      else if ((macro ((null:$value):tink.Stringly)).typeof().isSuccess())
+        macro (${prim(macro : tink.Stringly)} : Float);
       else
-        macro ((${prim(macro : String)} : Stringly) : Float);
+        macro ((${prim(macro : String)} : tink.Stringly) : Float);
         
     this._bool =
       if ((macro ((null:$value):Bool)).typeof().isSuccess())
-        prim(macro : Int);
-      else if ((macro ((null:$value):tink.querystring.Stringly)).typeof().isSuccess())
-        macro (${prim(macro : Stringly)} : Bool);
+        prim(macro : Bool);
+      else if ((macro ((null:$value):tink.querystring.tink.Stringly)).typeof().isSuccess())
+        macro (${prim(macro : tink.Stringly)} : Bool);
       else
-        macro ((${prim(macro : String)} : Stringly) : Bool);
+        macro ((${prim(macro : String)} : tink.Stringly) : Bool);
   }
   
   public function get() {

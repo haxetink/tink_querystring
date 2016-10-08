@@ -1,5 +1,6 @@
 package;
 import haxe.unit.TestCase;
+import tink.QueryString;
 import tink.url.Portion;
 import tink.url.Query;
 import tink.querystring.Parser;
@@ -10,7 +11,7 @@ class QueryParserTest extends TestCase {
 
   function testBase() {
     /*
-     * The keen observer may notice that the test below tests the implementation.
+     * The keen observer may notice that the test below tests the implementation - which is why the `@:privateAccess` is there.
      * This is not really necessary, but given that the macro generated parsers depend on it,
      * it is helpful to test it in isolation, to be able to better locate bugs in the generated parsers.
      */
@@ -34,17 +35,26 @@ class QueryParserTest extends TestCase {
   }
   
   function testParse() {
-    var complex:Nested = { foo: [ { z: .0 }, { x: 'hey', z: .1 }, { y: 4, z: .2 }, { x: 'yo', y: 5, z: .3 } ] };
     var p = new Parser<Nested>();    
-    var parsed = p.parse('foo[0].z=.0&foo[1].x=hey&foo[1].z=.1&foo[2].y=4&foo[2].z=.2&foo[3].x=yo&foo[3].y=5&foo[3].z=.3');
-    assertEquals(tink.Json.stringify(complex), tink.Json.stringify(parsed));
+    var parsed = p.parse(nestedString);
+    assertEquals(tink.Json.stringify(nestedObject), tink.Json.stringify(parsed));
+  }
+  
+  static var nestedObject:Nested = { foo: [ { z: .0 }, { x: '100%', z: .1 }, { y: [{i:4}], z: .2 }, { x: 'yo', y: [{i:5}, {i:6}], z: 1.5e100 } ] };
+  static var nestedString = 'foo[0].z=.0&foo[1].x=100%25&foo[1].z=.1&foo[2].y[0].i=4&foo[2].z=.2&foo[3].x=yo&foo[3].y[0].i=5&foo[3].y[1].i=6&foo[3].z=1.5e%2B100';
+  
+  function testFacade() {
+    var o1 = QueryString.parse((nestedString:Nested)).sure();
+    assertEquals(tink.Json.stringify(nestedObject), tink.Json.stringify(o1));
+    var o2:Nested = QueryString.parse(QueryString.build(o1));
+    assertEquals(tink.Json.stringify(nestedObject), tink.Json.stringify(o2));
   }
 }
 
 typedef Nested = { 
   foo: Array<{ 
     ?x: String, 
-    ?y:Int, 
+    ?y:Array<{ i: Int }>, 
     z:Float 
   }> 
 }

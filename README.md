@@ -4,7 +4,7 @@ This library provides the means to parse and build query strings - or similar st
 
 # Parsing
 
-## Basic Usage
+## Simple Parsing
 
 ```haxe
 typedef Post = {
@@ -13,18 +13,22 @@ typedef Post = {
   tags:Array<String>,
 }
 
-var parser = new tink.querystring.Parser<Post>();
-trace(parser.parse('title=Example+Post&body=This+is+an+example&tags[0]=foo&tags[1]=bar'));// { title: 'Example Post', body: { 'This is an example' }, tags: ['foo', 'bar'] }
 
-//Or with outcomes:
+//relying on expected type:
+var post:Post = tink.QueryString.parse('title=Example+Post&body=This+is+an+example&tags[0]=foo&tags[1]=bar');
+trace(post);//{ title: 'Example Post', body: 'This is an example', tags: ['foo', 'bar'] }
 
-trace(parser.tryParse('title=theTitle'))//Failure("Error#422: missing field body")
-trace(parser.tryParse('title=theTitle&body=theBody'))//Success({ title: 'theTitle', body: 'theBody', tags: [] })
+
+//specifying the type
+trace(tink.QueryString.parse(('title=Example+Post' : Post)));//Failure("Error#422: missing field body")
+trace(tink.QueryString.parse(('title=Example+Post&body=whatever' : Post)));//Success({ title: 'Example Post', body: 'whatever', tags: [] })
 ```
 
-### Understanding the parser
+Note that for the second usage the result is an Outcome, while for the first it is either a value of the expected type, or it throws an exception.
 
-The generated parser is a subclass of this class:
+### Parser Details
+
+The `tink.QueryString.parse` macro is really just a helper for generating a `tink.querystring.Parser`. Note that for a single type only one parser is generated in the whole build. The generated parser is a subclass of this class:
   
 ```haxe
 class ParserBase<Input, Value, Result> {
@@ -35,9 +39,17 @@ class ParserBase<Input, Value, Result> {
 
 To fully specify a parser type, you would use `Parser<Input->Value->Result>`, where `Value` is the type of the individual values found in the input. Much of the time you will not need this level of flexibility. So you can also leave a few things to the default: `Parser<Value->Result>` is a shorthand for `Parser<tink.parser.Pairs<Value>->Value->Result>` and `Parser<Result>` is a shorthand for `Parser<tink.url.Portion->Result>`. 
 
-So in the above example above, we could explicitly define the parser like so:
+So in the above example above, we could explicitly do everything by hand like so:
   
 ```haxe
 var parser = tink.querystring.Parser<tink.querystring.Pairs<tink.url.Portion>->Portion->Post>();
+parser.parse('title=Example+Post&body=This+is+an+example&tags[0]=foo&tags[1]=bar');
 ```
 
+# Building
+
+## Simple Building
+
+
+
+## Builder Details
