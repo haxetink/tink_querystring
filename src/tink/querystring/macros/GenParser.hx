@@ -10,6 +10,7 @@ import tink.typecrawler.Generator;
 
 using haxe.macro.TypeTools;
 using tink.MacroApi;
+using tink.CoreApi;
 
 class GenParser { 
   
