@@ -8,6 +8,7 @@ import tink.typecrawler.Crawler;
 import tink.typecrawler.FieldInfo;
 import tink.typecrawler.Generator;
 
+using tink.CoreApi;
 using tink.MacroApi;
 
 class GenBuilder {
@@ -46,8 +47,8 @@ class GenBuilder {
     this.buffer = bufferType.toComplex();   
   }
   
-  public function args():Array<String>
-    return ['prefix', 'buffer', 'data'];
+  public function wrap(placeholder:Expr, ct:ComplexType)
+    return placeholder.func(['prefix'.toArg(macro : String), 'buffer'.toArg(buffer), 'data'.toArg(ct)], false);    
     
   public function nullable(e:Expr):Expr
     return macro @:pos(e.pos) if (data != null) $e;
@@ -76,7 +77,7 @@ class GenBuilder {
   public function bytes():Expr
     return throw 'not implemented';
     
-  public function anon(fields:Array<FieldInfo>, ct:ComplexType):Function {
+  public function anon(fields:Array<FieldInfo>, ct:ComplexType) {
     
     function info(i:FieldInfo):Expr
       return macro @:pos(i.pos) {
@@ -88,9 +89,7 @@ class GenBuilder {
         ${i.expr};
       }
     
-    var body = [for (f in fields) info(f)].toBlock();
-    
-    return (macro @:pos(pos) function (prefix:String, buffer:$buffer, data:$ct) $body).getFunction().sure();
+    return [for (f in fields) info(f)].toBlock();    
   }
     
   public function array(e:Expr):Expr

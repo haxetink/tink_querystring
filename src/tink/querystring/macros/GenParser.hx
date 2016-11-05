@@ -73,7 +73,7 @@ class GenParser {
       else this.input = this.inputType.toComplex();
     }
     
-    //Now comes the sad part - see tink.querystring.tink.Stringly for further rants ...
+    //Now comes the sad part - see tink.Stringly for further rants ...
     this._string = 
       if ((macro ((null:$value):String)).typeof().isSuccess()) 
         prim(macro : String);
@@ -132,8 +132,8 @@ class GenParser {
   static public function build() 
     return BuildCache.getType('tink.querystring.Parser', buildNew);
     
-  public function args():Array<String> 
-    return ['prefix'];
+  public function wrap(placeholder:Expr, ct:ComplexType)
+    return placeholder.func(['prefix'.toArg(macro : String)], ct);
     
   public function nullable(e:Expr):Expr 
     return 
@@ -172,7 +172,7 @@ class GenParser {
     return throw "not implemented";
   }
   
-  public function anon(fields:Array<FieldInfo>, ct:ComplexType):Function {
+  public function anon(fields:Array<FieldInfo>, ct:ComplexType):Expr {
     var ret = [];
     for (f in fields)
       ret.push( { 
@@ -185,9 +185,8 @@ class GenParser {
           ${f.expr};
         } 
       });
-    return (macro function (prefix:String):$ct {
-      return ${EObjectDecl(ret).at()};
-    }).getFunction().sure();
+      
+    return EObjectDecl(ret).at();
   }
   
   public function array(e:Expr):Expr {
