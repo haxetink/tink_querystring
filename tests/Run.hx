@@ -2,10 +2,6 @@ package ;
 
 import haxe.unit.*;
 
-#if flash
-typedef Sys = flash.system.System;
-#end
-
 class Run {
   function new() {}
   static var tests:Array<TestCase> = [
@@ -17,8 +13,10 @@ class Run {
     for (c in tests)
       r.add(c);
     
-    if (!r.run())
-      Sys.exit(500);
+    travix.Logger.exit(
+      if (r.run()) 0
+      else 500
+    );
   }
 
 }
