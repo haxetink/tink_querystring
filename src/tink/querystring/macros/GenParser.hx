@@ -99,7 +99,7 @@ class GenParser {
     this._bool =
       if ((macro ((null:$value):Bool)).typeof().isSuccess())
         prim(macro : Bool);
-      else if ((macro ((null:$value):tink.querystring.tink.Stringly)).typeof().isSuccess())
+      else if ((macro ((null:$value):tink.Stringly)).typeof().isSuccess())
         macro (${prim(macro : tink.Stringly)} : Bool);
       else
         macro ((${prim(macro : String)} : tink.Stringly) : Bool);
@@ -157,20 +157,19 @@ class GenParser {
     return _int;
     
   public function dyn(e:Expr, ct:ComplexType):Expr 
-    return throw "not implemented";
+    return pos.error('Dynamic<T> parsing not implemented');
   
   public function dynAccess(e:Expr):Expr 
-    return throw "not implemented";
+    return pos.error('haxe.DynamicAccess<T> parsing not implemented');
   
   public function bool():Expr 
     return _bool;
   
-  public function date():Expr {
-    return throw "not implemented";
-  }
-  public function bytes():Expr {
-    return throw "not implemented";
-  }
+  public function date():Expr 
+    return pos.errorExpr('Date parsing not implemented');
+  
+  public function bytes():Expr 
+    return pos.errorExpr('Bytes parsing not implemented');
   
   public function anon(fields:Array<FieldInfo>, ct:ComplexType):Expr {
     var ret = [];
@@ -209,10 +208,10 @@ class GenParser {
     }
   }
   public function map(k:Expr, v:Expr):Expr {
-    return throw "not implemented";
+    return pos.error('Map parsing not implemented');
   }
   public function enm(constructors:Array<EnumConstructor>, ct:ComplexType, pos:Position, gen:GenType):Expr {
-    return throw "not implemented";
+    return pos.error('Enum parsing not implemented');
   }
   public function rescue(t:Type, pos:Position, gen:GenType):Option<Expr> {
     return Some(prim(t.toComplex()));

@@ -10,5 +10,8 @@ abstract Pairs<T>(Iterator<Named<T>>) from Iterator<Named<T>> to Iterator<Named<
     
   @:from static function portionsOfUrl(u:Url):Pairs<Portion>
     return portions(u.query);
-  
+    
+  @:from static function ofIterable<T>(i:Iterable<Named<T>>):Pairs<T>
+    return i.iterator();
+ 
 }
