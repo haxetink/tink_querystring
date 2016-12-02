@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Various updates.",
-	"version": "0.1.0",
+	"releasenote": "Minor improvements.",
+	"version": "0.2.0",
 	"url": "https://github.com/haxetink/tink_querystring/",
 	"dependencies": {
 		"tink_url": "",
