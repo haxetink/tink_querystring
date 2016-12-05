@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Minor improvements.",
-	"version": "0.2.0",
+	"releasenote": "Do not add null for omitted optional fields.",
+	"version": "0.2.1",
 	"url": "https://github.com/haxetink/tink_querystring/",
 	"dependencies": {
 		"tink_url": "",
