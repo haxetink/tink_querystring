@@ -172,20 +172,36 @@ class GenParser {
     return pos.errorExpr('Bytes parsing not implemented');
   
   public function anon(fields:Array<FieldInfo>, ct:ComplexType):Expr {
-    var ret = [];
+    var ret = [],
+        optional = [];
+        
     for (f in fields)
-      ret.push( { 
-        field: f.name, 
-        expr: macro {
+      if (f.optional) 
+        optional.push(macro {
           var prefix = switch prefix {
             case '': $v{f.name};
             case v: v + $v{ '.' + f.name};
           }
-          ${f.expr};
-        } 
-      });
+          if (exists[prefix])
+            ${['__o', f.name].drill()} = ${f.expr};        
+        })
+      else
+        ret.push( { 
+          field: f.name, 
+          expr: macro {
+            var prefix = switch prefix {
+              case '': $v{f.name};
+              case v: v + $v{ '.' + f.name};
+            }
+            ${f.expr};
+          } 
+        });
       
-    return EObjectDecl(ret).at();
+    return macro {
+      var __o:$ct = ${EObjectDecl(ret).at()};
+      $b{optional};
+      __o;
+    }
   }
   
   public function array(e:Expr):Expr {
