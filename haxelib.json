@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Do not add null for omitted optional fields.",
-	"version": "0.2.1",
+	"releasenote": "Update to recent tink_typecrawler and support @:enum abstract.",
+	"version": "0.3.0",
 	"url": "https://github.com/haxetink/tink_querystring/",
 	"dependencies": {
 		"tink_url": "",
