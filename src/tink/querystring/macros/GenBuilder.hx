@@ -111,6 +111,12 @@ class GenBuilder {
   public function reject(t:Type):String
     return 'Unsupported type $t';
   
+  public function shouldIncludeField(c:ClassField, owner:Option<ClassType>):Bool
+    return Helper.shouldIncludeField(c, owner);
+
+  public function drive(type:Type, pos:Position, gen:Type->Position->Expr):Expr
+    return gen(type, pos);
+  
   function get() {
     var crawl = Crawler.crawl(dataType, pos, this);
     

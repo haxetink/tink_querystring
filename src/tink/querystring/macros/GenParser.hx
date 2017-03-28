@@ -234,5 +234,11 @@ class GenParser {
   }
   public function reject(t:Type):String {
     return 'Cannot parse ${t.toString()}';
-  }    
+  }
+  
+  public function shouldIncludeField(c:ClassField, owner:Option<ClassType>):Bool
+    return Helper.shouldIncludeField(c, owner);
+
+  public function drive(type:Type, pos:Position, gen:Type->Position->Expr):Expr
+    return gen(type, pos);
 }
