@@ -1,4 +1,3 @@
 -lib tink_json
--lib tink_http
 -cp tests
 -main Run
