@@ -229,6 +229,11 @@ class GenParser {
   public function enm(constructors:Array<EnumConstructor>, ct:ComplexType, pos:Position, gen:GenType):Expr {
     return pos.error('Enum parsing not implemented');
   }
+  
+  public function enumAbstract(names:Array<String>, e:Expr):Expr {
+    return pos.error('Enum Abstract parsing not implemented');
+  }
+  
   public function rescue(t:Type, pos:Position, gen:GenType):Option<Expr> {
     return Some(prim(t.toComplex()));
   }

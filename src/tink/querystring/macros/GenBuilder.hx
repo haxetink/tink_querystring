@@ -104,6 +104,9 @@ class GenBuilder {
     
   public function enm(constructors:Array<EnumConstructor>, ct:ComplexType, pos:Position, gen:GenType):Expr
     return throw 'not implemented';
+  
+  public function enumAbstract(names:Array<String>, e:Expr):Expr
+    return throw 'not implemented';
     
   public function rescue(t:Type, pos:Position, gen:GenType):Option<Expr>
     return throw 'not implemented';
