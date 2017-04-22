@@ -230,7 +230,7 @@ class GenParser {
     return pos.error('Enum parsing not implemented');
   }
   
-  public function enumAbstract(names:Array<String>, e:Expr):Expr {
+  public function enumAbstract(names:Array<Expr>, e:Expr, ct:ComplexType, pos:Position):Expr {
     return pos.error('Enum Abstract parsing not implemented');
   }
   
