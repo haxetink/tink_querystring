@@ -11,7 +11,7 @@ class ParserBase<Input, Value, Result> {
   
   var params:Map<String, Value>;//TODO: consider storing a true hierarchy
   var exists:Map<String, Bool>;
-  var onError:Error->Void;
+  var onError:Callback<{ name:String, reason:String }>;
   var pos:Pos;
   
   public var result(default, null):Outcome<Result, Error>;
@@ -51,8 +51,8 @@ class ParserBase<Input, Value, Result> {
         
   }
  
-  static function abort(e:Error)
-    throw e;
+  function abort(e)
+    throw error('${e.reason} for ${e.name}');
 
   public function parse(input:Input):Result 
     return throw Error.withData(NotImplemented, 'not implemented', pos);
@@ -62,15 +62,21 @@ class ParserBase<Input, Value, Result> {
       try Success(parse(input))
       catch (e:Error) Failure(e)
       catch (e:Dynamic) Failure(error('Parse Error', e));
+
+  function attempt<T>(field:String, o:Outcome<T, Error>):Null<T> 
+    return switch o {
+      case Success(v): v;
+      case Failure(e): fail(field, e.message);
+    }
     
   function error(reason:String, ?data:Dynamic)
     return Error.withData(UnprocessableEntity, reason, data, pos);
     
-  function fail(reason:String, ?data:Dynamic):Dynamic {
-    onError(error(reason, data));
+  function fail(field:String, reason:String):Dynamic {
+    onError.invoke({ name:field, reason: reason });
     return null;
   }
     
   function missing(name:String):Dynamic 
-    return fail('Missing parameter $name');
+    return fail(name, 'Missing value');
 }

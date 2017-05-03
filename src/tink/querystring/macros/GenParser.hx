@@ -79,30 +79,31 @@ class GenParser {
         prim(macro : String);
       else 
         pos.error('${value.toString()} should be compatible with String');
+
+    function coerce(stringly:Expr, to:ComplexType) 
+      return
+        switch to {
+          case macro : Int, macro : Float:
+            var name = 'parse'+to.toString();
+            macro this.attempt(prefix, $stringly.$name());
+          default:
+            macro ($stringly : $to);
+        }    
+      
+
+    function parsePrimitive(expected:ComplexType) 
+      return
+        if ((macro ((null:$value):$expected)).typeof().isSuccess())
+          prim(macro : Int);
+        else if ((macro ((null:$value):tink.Stringly)).typeof().isSuccess())
+          coerce(macro ${prim(macro : tink.Stringly)}, expected);
+        else
+          coerce(macro (${prim(macro : String)} : tink.Stringly), expected);
+      
+    this._int = parsePrimitive(macro : Int);
+    this._float = parsePrimitive(macro : Float);
+    this._bool = parsePrimitive(macro : Bool);
         
-    this._int =
-      if ((macro ((null:$value):Int)).typeof().isSuccess())
-        prim(macro : Int);
-      else if ((macro ((null:$value):tink.Stringly)).typeof().isSuccess())
-        macro (${prim(macro : tink.Stringly)} : Int);
-      else
-        macro ((${prim(macro : String)} : tink.Stringly) : Int);
-        
-    this._float =
-      if ((macro ((null:$value):Float)).typeof().isSuccess())
-        prim(macro : Float);
-      else if ((macro ((null:$value):tink.Stringly)).typeof().isSuccess())
-        macro (${prim(macro : tink.Stringly)} : Float);
-      else
-        macro ((${prim(macro : String)} : tink.Stringly) : Float);
-        
-    this._bool =
-      if ((macro ((null:$value):Bool)).typeof().isSuccess())
-        prim(macro : Bool);
-      else if ((macro ((null:$value):tink.Stringly)).typeof().isSuccess())
-        macro (${prim(macro : tink.Stringly)} : Bool);
-      else
-        macro ((${prim(macro : String)} : tink.Stringly) : Bool);
   }
   
   public function get() {
