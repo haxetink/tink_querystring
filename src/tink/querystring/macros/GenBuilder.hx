@@ -72,7 +72,7 @@ class GenBuilder {
     return throw 'not implemented';
     
   public function date():Expr
-    return throw 'not implemented';
+    return prim;
     
   public function bytes():Expr
     return throw 'not implemented';

@@ -25,6 +25,7 @@ class GenParser {
   var input:ComplexType;
   
   var pos:Position;
+  var _date:Expr;
   var _int:Expr;
   var _float:Expr;
   var _string:Expr;
@@ -83,7 +84,7 @@ class GenParser {
     function coerce(stringly:Expr, to:ComplexType) 
       return
         switch to {
-          case macro : Int, macro : Float:
+          case macro : Int, macro : Float, macro : Date:
             var name = 'parse'+to.toString();
             macro this.attempt(prefix, $stringly.$name());
           default:
@@ -103,6 +104,7 @@ class GenParser {
     this._int = parsePrimitive(macro : Int);
     this._float = parsePrimitive(macro : Float);
     this._bool = parsePrimitive(macro : Bool);
+    this._date = parsePrimitive(macro : Date);
         
   }
   
@@ -167,7 +169,7 @@ class GenParser {
     return _bool;
   
   public function date():Expr 
-    return pos.errorExpr('Date parsing not implemented');
+    return _date;
   
   public function bytes():Expr 
     return pos.errorExpr('Bytes parsing not implemented');
