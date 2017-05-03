@@ -35,6 +35,12 @@ class QueryParserTest extends TestCase {
   }
   
   function testParse() {
+    var o = { date: Date.now() };
+    var old = o.date.getTime();
+
+    o = tink.QueryString.parse(tink.QueryString.build(o));
+    assertEquals(old, o.date.getTime());
+    
     var p = new Parser<Nested>();    
     var parsed = p.parse(nestedString);
     assertEquals(tink.Json.stringify(nestedObject), tink.Json.stringify(parsed));
@@ -55,6 +61,6 @@ typedef Nested = {
   foo: Array<{ 
     ?x: String, 
     ?y:Array<{ i: Int }>, 
-    z:Float 
+    z:Float,
   }> 
 }
