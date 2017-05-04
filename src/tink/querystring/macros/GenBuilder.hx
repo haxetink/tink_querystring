@@ -79,15 +79,24 @@ class GenBuilder {
     
   public function anon(fields:Array<FieldInfo>, ct:ComplexType) {
     
-    function info(i:FieldInfo):Expr
+    function info(i:FieldInfo):Expr {
+      
+      var formField = switch i.meta.getValues(':formField') {
+        case []: i.name;
+        case [[v]]: v.getName().sure();
+        case v: i.pos.error('more than one @:formField');
+      }
+      
       return macro @:pos(i.pos) {
         var prefix = switch prefix {
-          case '': $v{i.name};
-          case v: v + $v{'.'+i.name};
+          case '': $v{formField};
+          case v: v + $v{'.'+formField};
         }
         var data = ${['data', i.name].drill(i.pos)};
         ${i.expr};
       }
+
+    }
     
     return [for (f in fields) info(f)].toBlock();    
   }

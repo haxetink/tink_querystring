@@ -178,12 +178,18 @@ class GenParser {
     var ret = [],
         optional = [];
         
-    for (f in fields)
+    for (f in fields) {
+      var formField = switch f.meta.getValues(':formField') {
+        case []: f.name;
+        case [[v]]: v.getName().sure();
+        case v: f.pos.error('more than one @:formField');
+      }
+      
       if (f.optional) 
         optional.push(macro {
           var prefix = switch prefix {
-            case '': $v{f.name};
-            case v: v + $v{ '.' + f.name};
+            case '': $v{formField};
+            case v: v + $v{ '.' + formField};
           }
           if (exists[prefix])
             ${['__o', f.name].drill()} = ${f.expr};        
@@ -193,12 +199,13 @@ class GenParser {
           field: f.name, 
           expr: macro {
             var prefix = switch prefix {
-              case '': $v{f.name};
-              case v: v + $v{ '.' + f.name};
+              case '': $v{formField};
+              case v: v + $v{ '.' + formField};
             }
             ${f.expr};
           } 
         });
+    }
       
     return macro {
       var __o:$ct = ${EObjectDecl(ret).at()};
@@ -238,8 +245,14 @@ class GenParser {
   }
   
   public function rescue(t:Type, pos:Position, gen:GenType):Option<Expr> {
-    return Some(prim(t.toComplex()));
+    return Some(
+      macro 
+        try ${prim(t.toComplex())}
+        catch (e:tink.core.Error) this.fail(prefix, e.message)
+        catch (e:Dynamic) this.fail(prefix, Std.string(e))    
+    );
   }
+
   public function reject(t:Type):String {
     return 'Cannot parse ${t.toString()}';
   }

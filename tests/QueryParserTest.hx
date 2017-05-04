@@ -33,6 +33,15 @@ class QueryParserTest extends TestCase {
       assertEquals('o,o[0],o[0][a],o[0][b],o[1],o[1][c],o[1][d],o[1][d].x,x,x.c', a.join(','));
     }
   }
+
+  function testFormField() {
+    var o:{
+      @:formField('foo-bar') var fooBar:Int;
+    } = { fooBar: 4 };
+    assertEquals('foo-bar=4', tink.QueryString.build(o));
+    o = tink.QueryString.parse('foo-bar=12');
+    assertEquals(12, o.fooBar);
+  }
   
   function testParse() {
     var o = { date: Date.now() };
