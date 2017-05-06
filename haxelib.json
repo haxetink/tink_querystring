@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Update to recent tink_typecrawler and support @:enum abstract.",
-	"version": "0.3.0",
+	"releasenote": "Adapt to tink_typecrawler API changes. Support Date. Support custom field names. Changed error hook signature.",
+	"version": "0.4.0",
 	"url": "https://github.com/haxetink/tink_querystring/",
 	"dependencies": {
 		"tink_url": "",
