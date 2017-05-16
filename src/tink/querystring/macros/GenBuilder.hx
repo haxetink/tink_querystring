@@ -115,10 +115,10 @@ class GenBuilder {
     return throw 'not implemented';
   
   public function enumAbstract(names:Array<Expr>, e:Expr, ct:ComplexType, pos:Position):Expr
-    return throw 'not implemented';
+    return e;
     
   public function rescue(t:Type, pos:Position, gen:GenType):Option<Expr>
-    return throw 'not implemented';
+    return None;
     
   public function reject(t:Type):String
     return 'Unsupported type $t';
