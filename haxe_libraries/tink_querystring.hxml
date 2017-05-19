@@ -1,0 +1,4 @@
+-D tink_querystring
+-cp src
+-lib tink_url
+-lib tink_typecrawler
