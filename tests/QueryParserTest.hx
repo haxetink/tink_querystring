@@ -64,6 +64,13 @@ class QueryParserTest extends TestCase {
     var o2:Nested = QueryString.parse(QueryString.build(o1));
     assertEquals(tink.Json.stringify(nestedObject), tink.Json.stringify(o2));
   }
+  
+  function testEnumAbstract() {
+    var o = QueryString.parse(('e=aa':{e:MyEnumAbstract})).sure();
+    assertEquals(MyEnumAbstract.A, o.e);
+    var o = QueryString.parse(('e=ab':{e:MyEnumAbstract}));
+    assertFalse(o.isSuccess());
+  }
 }
 
 typedef Nested = { 
@@ -72,4 +79,10 @@ typedef Nested = {
     ?y:Array<{ i: Int }>, 
     z:Float,
   }> 
+}
+
+@:enum
+abstract MyEnumAbstract(String) {
+  var A = 'aa';
+  var B = 'bb';
 }

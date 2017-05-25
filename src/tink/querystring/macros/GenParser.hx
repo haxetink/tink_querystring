@@ -241,7 +241,14 @@ class GenParser {
   }
   
   public function enumAbstract(names:Array<Expr>, e:Expr, ct:ComplexType, pos:Position):Expr {
-    return pos.error('Enum Abstract parsing not implemented');
+    return macro @:pos(pos) {
+      var v:$ct = cast $e;
+      ${ESwitch(
+        macro v, 
+        [{expr: macro v, values: names}], 
+        macro throw new tink.core.Error(422, 'Unrecognized enum value: ' + v)
+      ).at(pos)}
+    }
   }
   
   public function rescue(t:Type, pos:Position, gen:GenType):Option<Expr> {
