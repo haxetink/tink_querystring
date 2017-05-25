@@ -1,7 +1,7 @@
 # Tinkerbell Querystringmanglingthing
 
 [![Build Status](https://travis-ci.org/haxetink/tink_querystring.svg?branch=master)](https://travis-ci.org/haxetink/tink_querystring)
-[![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg?maxAge=2592000)](https://gitter.im/haxetink/public)
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/haxetink/public)
 
 
 This library provides the means to parse and build query strings - or similar structures - into or from complex Haxe objects in a type-safe reflection-free way.
