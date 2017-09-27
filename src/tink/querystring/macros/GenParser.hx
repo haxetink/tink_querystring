@@ -185,10 +185,12 @@ class GenParser {
         case v: f.pos.error('more than one @:formField');
       }
 
+      #if tink_json
       switch f.meta.getValues(':json') {
         case [[]]: f.expr = macro tink.Json.parse(this.params.get(prefix));
         default:
       }
+      #end
       
       if (f.optional) 
         optional.push(macro {

@@ -87,10 +87,12 @@ class GenBuilder {
         case v: i.pos.error('more than one @:formField');
       }
 
+      #if tink_json
       switch i.meta.getValues(':json') {
         case [[]]: i.expr = macro buffer.add(prefix, (tink.Json.stringify(data): String));
         default:
       }
+      #end
       
       return macro @:pos(i.pos) {
         var prefix = switch prefix {
