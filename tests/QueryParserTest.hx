@@ -71,6 +71,19 @@ class QueryParserTest extends TestCase {
     var o = QueryString.parse(('e=ab':{e:MyEnumAbstract}));
     assertFalse(o.isSuccess());
   }
+
+  function testJsonExtension() {
+    var options = {
+      x: 123, y: 'abc'
+    }
+    var fragment = StringTools.urlEncode(tink.Json.stringify(options));
+    var query = 'options=$fragment';
+    var gen = QueryString.build(({options: options}: WithJson));
+    assertEquals(query, gen);
+    var out: WithJson = QueryString.parse(query);
+    assertEquals(options.x, out.options.x);
+    assertEquals(options.y, out.options.y);
+  }
 }
 
 typedef Nested = { 
@@ -79,6 +92,12 @@ typedef Nested = {
     ?y:Array<{ i: Int }>, 
     z:Float,
   }> 
+}
+
+typedef WithJson = {
+  @:json var options: {
+    x: Int, y: String
+  }
 }
 
 @:enum
