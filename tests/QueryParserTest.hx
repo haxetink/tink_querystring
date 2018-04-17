@@ -71,6 +71,11 @@ class QueryParserTest extends TestCase {
     var o = QueryString.parse(('e=ab':{e:MyEnumAbstract}));
     assertFalse(o.isSuccess());
   }
+  
+  function testOptionalReadOnly() {
+    var o = QueryString.parse(('s=ab':OptionalReadOnly));
+    assertTrue(o.isSuccess());
+  }
 }
 
 typedef Nested = { 
@@ -85,4 +90,8 @@ typedef Nested = {
 abstract MyEnumAbstract(String) {
   var A = 'aa';
   var B = 'bb';
+}
+
+typedef OptionalReadOnly = {
+  @:optional var s(default, never):String;
 }
