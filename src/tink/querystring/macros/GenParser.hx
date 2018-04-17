@@ -175,8 +175,7 @@ class GenParser {
     return pos.errorExpr('Bytes parsing not implemented');
   
   public function anon(fields:Array<FieldInfo>, ct:ComplexType):Expr {
-    var ret = [],
-        optional = [];
+    var ret = [];
         
     for (f in fields) {
       var formField = switch f.meta.getValues(':formField') {
@@ -185,31 +184,25 @@ class GenParser {
         case v: f.pos.error('more than one @:formField');
       }
       
-      if (f.optional) 
-        optional.push(macro {
+      ret.push( { 
+        field: f.name, 
+        expr: macro {
           var prefix = switch prefix {
             case '': $v{formField};
             case v: v + $v{ '.' + formField};
           }
-          if (exists[prefix])
-            ${['__o', f.name].drill()} = ${f.expr};        
-        })
-      else
-        ret.push( { 
-          field: f.name, 
-          expr: macro {
-            var prefix = switch prefix {
-              case '': $v{formField};
-              case v: v + $v{ '.' + formField};
-            }
-            ${f.expr};
-          } 
-        });
+          ${
+            if(f.optional)
+              macro if(exists[prefix]) ${f.expr} else null;    
+            else
+              f.expr
+          }
+        } 
+      });
     }
       
     return macro {
       var __o:$ct = ${EObjectDecl(ret).at()};
-      $b{optional};
       __o;
     }
   }
