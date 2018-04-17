@@ -75,6 +75,8 @@ class QueryParserTest extends TestCase {
   function testOptionalReadOnly() {
     var o = QueryString.parse(('s=ab':OptionalReadOnly));
     assertTrue(o.isSuccess());
+    var o = QueryString.parse(('':OptionalReadOnly));
+    assertTrue(o.isSuccess());
   }
 }
 
