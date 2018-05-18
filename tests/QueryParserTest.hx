@@ -1,4 +1,5 @@
 package;
+
 import haxe.unit.TestCase;
 import tink.QueryString;
 import tink.url.Portion;
@@ -70,6 +71,17 @@ class QueryParserTest extends TestCase {
     assertEquals(MyEnumAbstract.A, o.e);
     var o = QueryString.parse(('e=ab':{e:MyEnumAbstract}));
     assertFalse(o.isSuccess());
+  }
+
+  function testDefault() {
+    var o:{
+      @:default(12) var foo:Int;
+    } = QueryString.parse('');
+    assertEquals(12, o.foo);
+    var o:{
+      @:default(42) @:optional var foo:Int;
+    } = QueryString.parse('');
+    assertEquals(42, o.foo);
   }
 }
 

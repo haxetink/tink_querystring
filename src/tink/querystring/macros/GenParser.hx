@@ -185,26 +185,41 @@ class GenParser {
         case v: f.pos.error('more than one @:formField');
       }
       
+      var defaultValue = switch f.meta.getValues(':default') {
+        case []: None;
+        case [[v]]: Some(v);
+        case v: f.pos.error('more than one @:default');
+      }
+
+      var enter = (macro var prefix = switch prefix {
+        case '': $v{formField};
+        case v: v + $v{ '.' + formField};
+      });
+
       if (f.optional) 
         optional.push(macro {
-          var prefix = switch prefix {
-            case '': $v{formField};
-            case v: v + $v{ '.' + formField};
-          }
+          $enter;
           if (exists[prefix])
-            ${['__o', f.name].drill()} = ${f.expr};        
+            ${['__o', f.name].drill()} = ${f.expr};
+          else ${switch defaultValue {
+            case Some(v): ['__o', f.name].drill().assign(v);
+            default: null;
+          }};
         })
-      else
-        ret.push( { 
+      else {
+        var value = switch defaultValue {
+          case Some(v):
+            macro if (exists[prefix]) ${f.expr} else $v;
+          default: f.expr;
+        }
+        ret.push({ 
           field: f.name, 
           expr: macro {
-            var prefix = switch prefix {
-              case '': $v{formField};
-              case v: v + $v{ '.' + formField};
-            }
-            ${f.expr};
+            $enter;
+            $value;
           } 
         });
+      }
     }
       
     return macro {
