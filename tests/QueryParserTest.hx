@@ -1,6 +1,5 @@
 package;
 
-import haxe.unit.TestCase;
 import tink.QueryString;
 import tink.url.Portion;
 import tink.url.Query;
@@ -8,9 +7,12 @@ import tink.querystring.Parser;
 using tink.CoreApi;
 using StringTools;
 
-class QueryParserTest extends TestCase { 
+@:asserts
+class QueryParserTest { 
+  
+  public function new() {}
 
-  function testBase() {
+  public function testBase() {
     /*
      * The keen observer may notice that the test below tests the implementation - which is why the `@:privateAccess` is there.
      * This is not really necessary, but given that the macro generated parsers depend on it,
@@ -31,57 +33,63 @@ class QueryParserTest extends TestCase {
       var a = [for (k in exists.keys()) k];
       a.sort(Reflect.compare);
       
-      assertEquals('o,o[0],o[0][a],o[0][b],o[1],o[1][c],o[1][d],o[1][d].x,x,x.c', a.join(','));
+      asserts.assert('o,o[0],o[0][a],o[0][b],o[1],o[1][c],o[1][d],o[1][d].x,x,x.c' == a.join(','));
     }
+    return asserts.done();
   }
 
-  function testFormField() {
+  public function testFormField() {
     var o:{
       @:formField('foo-bar') var fooBar:Int;
     } = { fooBar: 4 };
-    assertEquals('foo-bar=4', tink.QueryString.build(o));
+    asserts.assert('foo-bar=4' == tink.QueryString.build(o));
     o = tink.QueryString.parse('foo-bar=12');
-    assertEquals(12, o.fooBar);
+    asserts.assert(12 == o.fooBar);
+    return asserts.done();
   }
   
-  function testParse() {
+  public function testParse() {
     var o = { date: #if (cpp || cs) new Date(2017,5,5,0,0,0) #else Date.now() #end }; // TODO: cpp/cs precision issue
     var old = o.date.getTime();
 
     o = tink.QueryString.parse(tink.QueryString.build(o));
-    assertEquals(old, o.date.getTime());
+    asserts.assert(old == o.date.getTime());
     
     var p = new Parser<Nested>();    
     var parsed = p.parse(nestedString);
-    assertEquals(tink.Json.stringify(nestedObject), tink.Json.stringify(parsed));
+    asserts.assert(tink.Json.stringify(nestedObject) == tink.Json.stringify(parsed));
+    return asserts.done();
   }
   
   static var nestedObject:Nested = { foo: [ { z: .0 }, { x: '100%', z: .1 }, { y: [{i:4}], z: .2 }, { x: 'yo', y: [{i:5}, {i:6}], z: 1.5e100 } ] };
   static var nestedString = 'foo[0].z=.0&foo[1].x=100%25&foo[1].z=.1&foo[2].y[0].i=4&foo[2].z=.2&foo[3].x=yo&foo[3].y[0].i=5&foo[3].y[1].i=6&foo[3].z=1.5e%2B100';
   
-  function testFacade() {
+  public function testFacade() {
     var o1 = QueryString.parse((nestedString:Nested)).sure();
-    assertEquals(tink.Json.stringify(nestedObject), tink.Json.stringify(o1));
+    asserts.assert(tink.Json.stringify(nestedObject) == tink.Json.stringify(o1));
     var o2:Nested = QueryString.parse(QueryString.build(o1));
-    assertEquals(tink.Json.stringify(nestedObject), tink.Json.stringify(o2));
+    asserts.assert(tink.Json.stringify(nestedObject) == tink.Json.stringify(o2));
+    return asserts.done();
   }
   
-  function testEnumAbstract() {
+  public function testEnumAbstract() {
     var o = QueryString.parse(('e=aa':{e:MyEnumAbstract})).sure();
-    assertEquals(MyEnumAbstract.A, o.e);
+    asserts.assert(MyEnumAbstract.A == o.e);
     var o = QueryString.parse(('e=ab':{e:MyEnumAbstract}));
-    assertFalse(o.isSuccess());
+    asserts.assert(!o.isSuccess());
+    return asserts.done();
   }
 
-  function testDefault() {
+  public function testDefault() {
     var o:{
       @:default(12) var foo:Int;
     } = QueryString.parse('');
-    assertEquals(12, o.foo);
+    asserts.assert(12 == o.foo);
     var o:{
       @:default(42) @:optional var foo:Int;
     } = QueryString.parse('');
-    assertEquals(42, o.foo);
+    asserts.assert(42 == o.foo);
+    return asserts.done();
   }
 }
 

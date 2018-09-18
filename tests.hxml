@@ -2,3 +2,4 @@
 -main Run
 -dce full
 -lib tink_json
+-lib tink_unittest
