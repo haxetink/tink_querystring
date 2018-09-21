@@ -116,7 +116,7 @@ class GenBuilder {
   
   public function enumAbstract(names:Array<Expr>, e:Expr, ct:ComplexType, pos:Position):Expr {
     return switch ct.toType() {
-      case Success(TAbstract(_.get() => {type: type = _.getID() => 'String' | 'Int' | 'Float' | 'Bool' | 'Date'}, _)):
+      case Success(TAbstract(_.get() => {type: type}, _)) if(Context.unify(Context.getType('tink.Stringly'), type)):
           var ct = type.toComplex();
           macro buffer.add(prefix, (cast data:$ct));
       case _:
