@@ -42,7 +42,7 @@ class ParserBase<Input, Value, Result> {
           
           exists[name] = true;
           
-          switch [name.lastIndexOf('[', end), name.lastIndexOf('.', end)] {
+          switch [name.lastIndexOf('[', end - 1), name.lastIndexOf('.', end - 1)] {
             case [a, b] if (a > b): end = a;
             case [_, b]: end = b;
           }
