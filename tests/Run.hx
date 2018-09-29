@@ -1,22 +1,14 @@
 package ;
 
-import haxe.unit.*;
+import tink.unit.*;
+import tink.testrunner.*;
 
 class Run {
-  function new() {}
-  static var tests:Array<TestCase> = [
-    new QueryParserTest(),
-  ];
-  static function main() {  
-    
-    var r = new TestRunner();
-    for (c in tests)
-      r.add(c);
-    
-    travix.Logger.exit(
-      if (r.run()) 0
-      else 500
-    );
+  
+  static function main() {
+    Runner.run(TestBatch.make([
+      new QueryParserTest(),
+    ])).handle(Runner.exit);
   }
 
 }

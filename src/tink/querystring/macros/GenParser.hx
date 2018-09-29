@@ -184,6 +184,13 @@ class GenParser {
         case v: f.pos.error('more than one @:formField');
       }
       
+      
+      var defaultValue = switch f.meta.getValues(':default') {
+        case []: None;
+        case [[v]]: Some(v);
+        case v: f.pos.error('more than one @:default');
+      }
+      
       ret.push( { 
         field: f.name, 
         expr: macro {
@@ -193,9 +200,17 @@ class GenParser {
           }
           ${
             if(f.optional)
-              macro if(exists[prefix]) ${f.expr} else null;    
+              macro if (exists[prefix])
+                ${f.expr};
+              else ${switch defaultValue {
+                case Some(v): v;
+                default: macro null;
+              }};
             else
-              f.expr
+              ${switch defaultValue {
+                case Some(v): macro if (exists[prefix]) ${f.expr} else $v;
+                default: f.expr;
+              }}
           }
         } 
       });
