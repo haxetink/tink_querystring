@@ -41,7 +41,7 @@ class ParserBase<Input, Value, Result> {
 }
 ```
 
-To fully specify a parser type, you would use `Parser<Input->Value->Result>`, where `Value` is the type of the individual values found in the input. Much of the time you will not need this level of flexibility. So you can also leave a few things to the default: `Parser<Value->Result>` is a shorthand for `Parser<tink.parser.Pairs<Value>->Value->Result>` and `Parser<Result>` is a shorthand for `Parser<tink.url.Portion->Result>`. 
+To fully specify a parser type, you would use `Parser<Input->Value->Result>`, where `Value` is the type of the individual values found in the input. Much of the time you will not need this level of flexibility. So you can also leave a few things to the default: `Parser<Value->Result>` is a shorthand for `Parser<tink.querystring.Pairs<Value>->Value->Result>` and `Parser<Result>` is a shorthand for `Parser<tink.url.Portion->Result>`. 
 
 So in the above example above, we could explicitly do everything by hand like so:
   
