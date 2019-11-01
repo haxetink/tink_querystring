@@ -25,7 +25,7 @@ script:
   - lix run travix js
   # - lix run travix flash
   - if [[ "$(haxe -version)" =~ ^4.* ]]; then lix run travix java -D jvm; fi
-  - if [[ "$(haxe -version)" =~ ^4.* ]]; then lix run travix java; fi
+  # - if [[ "$(haxe -version)" =~ ^4.* ]]; then lix run travix java; fi
   - lix run travix cs
   - lix run travix cpp
   - lix run travix php
