@@ -128,7 +128,7 @@ class GenBuilder {
     return None;
     
   public function reject(t:Type):String
-    return 'Unsupported type $t';
+    return '[tink_querystring] Unsupported type $t';
   
   public function shouldIncludeField(c:ClassField, owner:Option<ClassType>):Bool
     return Helper.shouldIncludeField(c, owner);
