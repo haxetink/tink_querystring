@@ -124,8 +124,14 @@ class GenBuilder {
     }
   }
     
-  public function rescue(t:Type, pos:Position, gen:GenType):Option<Expr>
-    return None;
+  public function rescue(t:Type, pos:Position, gen:GenType):Option<Expr> {
+    var ct = t.toComplex();
+    var bt = bufferType.toComplex();
+    return switch (macro (null:$bt).add(null, (null:$ct))).typeof() {
+      case Success(_): Some(prim);
+      case Failure(_): None;
+    }
+  }
     
   public function reject(t:Type):String
     return '[tink_querystring] Unsupported type $t';
