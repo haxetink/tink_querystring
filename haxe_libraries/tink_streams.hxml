@@ -1,5 +1,6 @@
+# @install: lix --silent download "gh://github.com/haxetink/tink_streams#aab6ed2ce041f1d3960f1c992be2a6e754b2faff" into tink_streams/0.3.3/github/aab6ed2ce041f1d3960f1c992be2a6e754b2faff
 -lib tink_core
--cp ${SCOPE_DIR}/../tink_streams/src
+-cp ${HAXE_LIBCACHE}/tink_streams/0.3.3/github/aab6ed2ce041f1d3960f1c992be2a6e754b2faff/src
 -D tink_streams=0.3.3
-${SCOPE_DIR}/../tink_streams/extraParams.hxml
---macro Sys.println("haxe_libraries/tink_streams.hxml:3: [Warning] Using dev version of library tink_streams")
+# temp for development, delete this file when pure branch merged
+-D pure
