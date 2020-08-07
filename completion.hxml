@@ -1,5 +1,4 @@
 tests.hxml
 -lib tink_querystring
 -lib travix
--js ignore.js
---no-output
+-python test.py

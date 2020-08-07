@@ -65,11 +65,7 @@ class GenBuilder {
   public function bool():Expr
     return prim;
   
-  public function dyn(e:Expr, ct:ComplexType):Expr
-    return throw 'not implemented';
-    
-  public function dynAccess(e:Expr):Expr
-    return throw 'not implemented';
+ 
     
   public function date():Expr
     return prim;
@@ -100,7 +96,19 @@ class GenBuilder {
     
     return [for (f in fields) info(f)].toBlock();    
   }
+  public function dyn(e:Expr, ct:ComplexType):Expr
+    return (macro @:pos(e.pos) {
+      var data:haxe.DynamicAccess<$ct> = data;
+      $e;
+    });
     
+  public function dynAccess(e:Expr):Expr
+    return (macro @:pos(e.pos) for (key in data.keys()) {
+      var data = data[key],
+          prefix = prefix + '[' + key + ']';
+      $e;
+    });
+  
   public function array(e:Expr):Expr
     return (macro @:pos(e.pos) for (i in 0...data.length) {
       var data = data[i],

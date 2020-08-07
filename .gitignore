@@ -1,3 +1,5 @@
 bin
 node_modules
 *.n
+package-lock.json
+test.py
