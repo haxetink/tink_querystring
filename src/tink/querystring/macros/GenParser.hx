@@ -159,11 +159,22 @@ class GenParser {
   public function int():Expr 
     return _int;
     
-  public function dyn(e:Expr, ct:ComplexType):Expr 
-    return pos.error('Dynamic<T> parsing not implemented');
-  
-  public function dynAccess(e:Expr):Expr 
-    return pos.error('haxe.DynamicAccess<T> parsing not implemented');
+  public function dyn(e, ct) 
+    return macro ($e : Dynamic<$ct>);
+
+	public function dynAccess(e:Expr):Expr
+		return macro {
+      var ret = new haxe.DynamicAccess();
+			if (maps.exists(prefix)) {
+				for (key in maps[prefix]) {
+					var prefix = prefix + '[' + key + ']';
+					if (exists[prefix]) {
+						ret.set(key, $e);
+					}
+				}
+			}
+			ret;
+		}
   
   public function bool():Expr 
     return _bool;

@@ -61,8 +61,13 @@ class QueryParserTest {
     return asserts.done();
   }
   
-  static var nestedObject:Nested = { foo: [ { z: .0 }, { x: '100%', z: .1 }, { y: [{i:4}], z: .2 }, { x: 'yo', y: [{i:5}, {i:6}], z: 1.5e100 } ] };
-  static var nestedString = 'foo[0].z=.0&foo[1].x=100%25&foo[1].z=.1&foo[2].y[0].i=4&foo[2].z=.2&foo[3].x=yo&foo[3].y[0].i=5&foo[3].y[1].i=6&foo[3].z=1.5e%2B100';
+  static var nestedObject:Nested = {foo: [
+		{z: .0},
+		{x: '100%', z: .1},
+		{y: [{i: 4}], z: .2},
+		{x: 'yo', y: [{i: 5}, {i: 6}], z: 1.5e100}
+	], dyn: {foo: 'bar', bar: 'foo'}};
+	static var nestedString = 'foo[0].z=.0&foo[1].x=100%25&foo[1].z=.1&foo[2].y[0].i=4&foo[2].z=.2&foo[3].x=yo&foo[3].y[0].i=5&foo[3].y[1].i=6&foo[3].z=1.5e%2B100&dyn[foo]=bar&dyn[bar]=foo';
   
   public function testFacade() {
     var o1 = QueryString.parse((nestedString:Nested)).sure();
@@ -98,7 +103,8 @@ typedef Nested = {
     ?x: String, 
     ?y:Array<{ i: Int }>, 
     z:Float,
-  }> 
+  }>,
+  dyn:Dynamic<String> 
 }
 
 @:enum
