@@ -11,6 +11,7 @@ class ParserBase<Input, Value, Result> {
   
   var params:Map<String, Value>;//TODO: consider storing a true hierarchy
   var exists:Map<String, Bool>;
+  var maps:Map<String,Array<String>>;
   var onError:Callback<{ name:String, reason:String }>;
   var pos:Pos;
   
@@ -27,7 +28,7 @@ class ParserBase<Input, Value, Result> {
   function init<A>(input:Iterator<A>, name:A->String, value:A->Value) {
     this.params = new Map();
     this.exists = new Map();
-    
+    this.maps = new Map();
     if (input != null) 
       for (pair in input) {
         var name = name(pair);
@@ -43,7 +44,11 @@ class ParserBase<Input, Value, Result> {
           exists[name] = true;
           
           switch [name.lastIndexOf('[', end - 1), name.lastIndexOf('.', end - 1)] {
-            case [a, b] if (a > b): end = a;
+            case [a, b] if (a > b):	end = a;
+            var nextName = name.substring(0, end);
+            if (!maps.exists(nextName))
+              maps.set(nextName, []);
+            maps[nextName].push(name.substring(end+1, name.lastIndexOf(']')));
             case [_, b]: end = b;
           }
         }
