@@ -3,6 +3,7 @@ package tink.querystring;
 import tink.url.*;
 using tink.CoreApi;
 
+@:transitive
 abstract Pairs<T>(Iterator<Named<T>>) from Iterator<Named<T>> to Iterator<Named<T>> {
   
   @:from static function portions(s:String):Pairs<Portion>
