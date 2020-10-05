@@ -114,7 +114,7 @@ class GenParser {
     var ret = macro class $name extends tink.querystring.Parser.ParserBase<$input, $value, $result> {
       override public function parse(input:$input) {
         var prefix = '';
-        this.init(input, p -> p.name, p -> p.value);
+        this.init(input, function(p) return p.name, function(p) return p.value);
         return ${crawl.expr};
       }
       
