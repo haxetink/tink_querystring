@@ -91,6 +91,14 @@ class QueryParserTest {
     asserts.assert(42 == o.foo);
     return asserts.done();
   }
+  
+  public function testOptionalReadOnly() {
+    var o = QueryString.parse(('s=ab':OptionalReadOnly));
+    asserts.assert(o.isSuccess());
+    var o = QueryString.parse(('':OptionalReadOnly));
+    asserts.assert(o.isSuccess());
+    return asserts.done();
+  }
 }
 
 typedef Nested = { 
@@ -105,4 +113,8 @@ typedef Nested = {
 abstract MyEnumAbstract(String) {
   var A = 'aa';
   var B = 'bb';
+}
+
+typedef OptionalReadOnly = {
+  @:optional var s(default, never):String;
 }

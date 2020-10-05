@@ -112,13 +112,9 @@ class GenParser {
     var crawl = Crawler.crawl(resultType, pos, this);
     
     var ret = macro class $name extends tink.querystring.Parser.ParserBase<$input, $value, $result> {
-      
-      function getName(p):String return p.name;
-      function getValue(p):$value return p.value;
-      
       override public function parse(input:$input) {
         var prefix = '';
-        this.init(input, getName, getValue);
+        this.init(input, function(p) return p.name, function(p) return p.value);
         return ${crawl.expr};
       }
       
@@ -175,8 +171,7 @@ class GenParser {
     return pos.errorExpr('Bytes parsing not implemented');
   
   public function anon(fields:Array<FieldInfo>, ct:ComplexType):Expr {
-    var ret = [],
-        optional = [];
+    var ret = [];
         
     for (f in fields) {
       var formField = switch f.meta.getValues(':formField') {
@@ -185,46 +180,40 @@ class GenParser {
         case v: f.pos.error('more than one @:formField');
       }
       
+      
       var defaultValue = switch f.meta.getValues(':default') {
         case []: None;
         case [[v]]: Some(v);
         case v: f.pos.error('more than one @:default');
       }
-
-      var enter = (macro var prefix = switch prefix {
-        case '': $v{formField};
-        case v: v + $v{ '.' + formField};
+      
+      ret.push( { 
+        field: f.name, 
+        expr: macro {
+          var prefix = switch prefix {
+            case '': $v{formField};
+            case v: v + $v{ '.' + formField};
+          }
+          ${
+            if(f.optional)
+              macro if (exists[prefix])
+                ${f.expr};
+              else ${switch defaultValue {
+                case Some(v): v;
+                default: macro null;
+              }};
+            else
+              ${switch defaultValue {
+                case Some(v): macro if (exists[prefix]) ${f.expr} else $v;
+                default: f.expr;
+              }}
+          }
+        } 
       });
-
-      if (f.optional) 
-        optional.push(macro {
-          $enter;
-          if (exists[prefix])
-            ${['__o', f.name].drill()} = ${f.expr};
-          else ${switch defaultValue {
-            case Some(v): ['__o', f.name].drill().assign(v);
-            default: null;
-          }};
-        })
-      else {
-        var value = switch defaultValue {
-          case Some(v):
-            macro if (exists[prefix]) ${f.expr} else $v;
-          default: f.expr;
-        }
-        ret.push({ 
-          field: f.name, 
-          expr: macro {
-            $enter;
-            $value;
-          } 
-        });
-      }
     }
       
     return macro {
       var __o:$ct = ${EObjectDecl(ret).at()};
-      $b{optional};
       __o;
     }
   }
