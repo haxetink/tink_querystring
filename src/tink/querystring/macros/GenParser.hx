@@ -112,13 +112,9 @@ class GenParser {
     var crawl = Crawler.crawl(resultType, pos, this);
     
     var ret = macro class $name extends tink.querystring.Parser.ParserBase<$input, $value, $result> {
-      
-      function getName(p):String return p.name;
-      function getValue(p):$value return p.value;
-      
       override public function parse(input:$input) {
         var prefix = '';
-        this.init(input, getName, getValue);
+        this.init(input, p -> p.name, p -> p.value);
         return ${crawl.expr};
       }
       
