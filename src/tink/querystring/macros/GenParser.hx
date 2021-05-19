@@ -113,8 +113,8 @@ class GenParser {
     
     var ret = macro class $name extends tink.querystring.Parser.ParserBase<$input, $value, $result> {
       
-      function getName(p):String return p.name;
-      function getValue(p):$value return p.value;
+      function getName(p:Named<$value>):String return p.name;
+      function getValue(p:Named<$value>):$value return p.value;
       
       override public function parse(input:$input) {
         var prefix = '';
