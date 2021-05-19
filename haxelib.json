@@ -1,21 +1,21 @@
 {
 	"name": "tink_querystring",
-	"license": "MIT",
+	"classPath": "src",
+	"dependencies": {
+		"tink_typecrawler": "",
+		"tink_url": ""
+	},
+	"url": "https://github.com/haxetink/tink_querystring/",
+	"contributors": [
+		"back2dos"
+	],
+	"version": "0.7.0",
+	"releasenote": "Fix various compatibility issues.",
 	"tags": [
 		"tink",
 		"cross",
 		"url",
 		"querystring"
 	],
-	"classPath": "src",
-	"contributors": [
-		"back2dos"
-	],
-	"releasenote": "Support default values.",
-	"version": "0.6.0",
-	"url": "https://github.com/haxetink/tink_querystring/",
-	"dependencies": {
-		"tink_url": "",
-		"tink_typecrawler": ""
-	}
+	"license": "MIT"
 }
