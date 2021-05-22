@@ -6,10 +6,7 @@
     {
       "type": "shell",
       "label": "travix",
-      "command": "node_modules/.bin/haxelib run travix node",
-      "windows": {
-        "command": "node_modules\\.bin\\haxelib.cmd run travix node",
-      },
+      "command": "lix run travix node",
       "problemMatcher": [
         "$haxe-absolute",
         "$haxe",
