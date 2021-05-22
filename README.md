@@ -1,6 +1,6 @@
 # Tinkerbell Querystringmanglingthing
 
-[![Build Status](https://travis-ci.org/haxetink/tink_querystring.svg?branch=master)](https://travis-ci.org/haxetink/tink_querystring)
+[![Build Status](https://github.com/haxetink/tink_querystring/actions/workflows/ci.yml/badge.svg)](https://github.com/haxetink/tink_querystring/actions)
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/haxetink/public)
 
 
