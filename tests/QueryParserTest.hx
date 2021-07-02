@@ -12,7 +12,7 @@ class QueryParserTest {
   
   public function new() {}
 
-  public function testBase() {
+  public function base() {
     /*
      * The keen observer may notice that the test below tests the implementation - which is why the `@:privateAccess` is there.
      * This is not really necessary, but given that the macro generated parsers depend on it,
@@ -38,7 +38,7 @@ class QueryParserTest {
     return asserts.done();
   }
 
-  public function testFormField() {
+  public function formField() {
     var o:{
       @:formField('foo-bar') var fooBar:Int;
     } = { fooBar: 4 };
@@ -48,7 +48,7 @@ class QueryParserTest {
     return asserts.done();
   }
   
-  public function testParse() {
+  public function parse() {
     var o = { date: #if (cpp || cs) new Date(2017,5,5,0,0,0) #else Date.now() #end }; // TODO: cpp/cs precision issue
     var old = o.date.getTime();
 
@@ -64,7 +64,7 @@ class QueryParserTest {
   static var nestedObject:Nested = { foo: [ { z: .0 }, { x: '100%', z: .1 }, { y: [{i:4}], z: .2 }, { x: 'yo', y: [{i:5}, {i:6}], z: 1.5e100 } ] };
   static var nestedString = 'foo[0].z=.0&foo[1].x=100%25&foo[1].z=.1&foo[2].y[0].i=4&foo[2].z=.2&foo[3].x=yo&foo[3].y[0].i=5&foo[3].y[1].i=6&foo[3].z=1.5e%2B100';
   
-  public function testFacade() {
+  public function facade() {
     var o1 = QueryString.parse((nestedString:Nested)).sure();
     asserts.assert(tink.Json.stringify(nestedObject) == tink.Json.stringify(o1));
     var o2:Nested = QueryString.parse(QueryString.build(o1));
@@ -72,7 +72,7 @@ class QueryParserTest {
     return asserts.done();
   }
   
-  public function testEnumAbstract() {
+  public function enumAbstract() {
     var o = QueryString.parse(('e=aa':{e:MyEnumAbstract})).sure();
     asserts.assert(MyEnumAbstract.A == o.e);
     var o = QueryString.parse(('e=ab':{e:MyEnumAbstract}));
@@ -80,7 +80,7 @@ class QueryParserTest {
     return asserts.done();
   }
 
-  public function testDefault() {
+  public function defaultValue() {
     var o:{
       @:default(12) var foo:Int;
     } = QueryString.parse('');
