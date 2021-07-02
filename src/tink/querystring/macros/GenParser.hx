@@ -11,6 +11,7 @@ import tink.typecrawler.Generator;
 using haxe.macro.TypeTools;
 using tink.MacroApi;
 using tink.CoreApi;
+using Lambda;
 
 class GenParser {
 
@@ -30,6 +31,8 @@ class GenParser {
   var _float:Expr;
   var _string:Expr;
   var _bool:Expr;
+  
+  static final CUSTOM_META = ':queryParse';
 
   function new(name, rawType:Type, pos) {
 
@@ -285,6 +288,33 @@ class GenParser {
   public function shouldIncludeField(c:ClassField, owner:Option<ClassType>):Bool
     return Helper.shouldIncludeField(c, owner);
 
-  public function drive(type:Type, pos:Position, gen:Type->Position->Expr):Expr
-    return gen(type, pos);
+  public function drive(type:Type, pos:Position, gen:Type->Position->Expr):Expr {
+    return switch type.getMeta().fold((current, all:Array<MetadataEntry>) -> all.concat(current.extract(CUSTOM_META)), []) {
+      case []:
+        gen(type, pos);
+      case _[0] => { params: [custom] }:
+        var rule:CustomRule =
+          switch custom {
+            case { expr: EFunction(_, _) }: WithFunction(custom);
+            // case { expr: EParenthesis({ expr: ECheckType(_, TPath(path)) }) }: WithClass(path, custom.pos);
+            case _ if(custom.typeof().sure().reduce().match(TFun(_, _))): WithFunction(custom);
+            // default: WithClass(custom.toString().asTypePath(), custom.pos);
+            case _: custom.pos.error('unsupported');
+          }
+        processCustom(rule, type, drive.bind(_, pos, gen));
+      case _[0] => { pos: pos }:
+        pos.error('Invalid use of @$CUSTOM_META');
+        
+    }
+  }
+  
+  function processCustom(c:CustomRule, original:Type, gen:Type->Expr):Expr {
+    var original = original.toComplex();
+    return switch c {
+      case WithFunction(e):
+        var rep = (macro @:pos(e.pos) { var f = null; ($e(f()) : $original); f(); }).typeof().sure();
+        macro @:pos(e.pos) $e(${gen(rep)});
+    }
+  }
+  
 }

@@ -91,6 +91,16 @@ class QueryParserTest {
     asserts.assert(42 == o.foo);
     return asserts.done();
   }
+
+  public function custom() {
+    var o = {foo: new Custom(42)}
+    var s = QueryString.build(o);
+    asserts.assert(s == 'foo=42');
+    
+    o = QueryString.parse('foo=123');
+    asserts.assert(o.foo.i == 123);
+    return asserts.done();
+  }
 }
 
 typedef Nested = { 
@@ -105,4 +115,14 @@ typedef Nested = {
 abstract MyEnumAbstract(String) {
   var A = 'aa';
   var B = 'bb';
+}
+
+
+@:queryStringify(v -> v.i)
+@:queryParse(i -> new QueryParserTest.Custom(i))
+class Custom {
+  public final i:Int;
+  public function new(i) {
+    this.i = i;
+  }
 }

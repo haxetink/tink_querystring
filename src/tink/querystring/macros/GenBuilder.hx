@@ -8,6 +8,7 @@ import tink.typecrawler.Crawler;
 import tink.typecrawler.FieldInfo;
 import tink.typecrawler.Generator;
 
+using Lambda;
 using tink.CoreApi;
 using tink.MacroApi;
 
@@ -21,6 +22,8 @@ class GenBuilder {
   
   var dataType:Type;
   var bufferType:Type;
+  
+  static final CUSTOM_META = ':queryStringify';
   
   function new(name, rawType:Type, pos) {
     
@@ -138,8 +141,42 @@ class GenBuilder {
   public function shouldIncludeField(c:ClassField, owner:Option<ClassType>):Bool
     return Helper.shouldIncludeField(c, owner);
 
-  public function drive(type:Type, pos:Position, gen:Type->Position->Expr):Expr
-    return gen(type, pos);
+  public function drive(type:Type, pos:Position, gen:Type->Position->Expr):Expr {
+    return switch type.getMeta().fold((current, all:Array<MetadataEntry>) -> all.concat(current.extract(CUSTOM_META)), []) {
+      case []:
+        gen(type, pos);
+      case _[0] => { params: [custom] }:
+        var rule:CustomRule =
+          switch custom {
+            case { expr: EFunction(_, _) }: WithFunction(custom);
+            // case { expr: EParenthesis({ expr: ECheckType(_, TPath(path)) }) }: WithClass(path, custom.pos);
+            case _ if(custom.typeof().sure().reduce().match(TFun(_, _))): WithFunction(custom);
+            // default: WithClass(custom.toString().asTypePath(), custom.pos);
+            case _: custom.pos.error('unsupported');
+          }
+        processCustom(rule, type, drive.bind(_, pos, gen));
+      case _[0] => { pos: pos }:
+        pos.error('Invalid use of @$CUSTOM_META');
+        
+    }
+  }
+  
+  function processCustom(c:CustomRule, original:Type, gen:Type->Expr):Expr {
+    var original = original.toComplex();
+    return switch c {
+      case WithFunction(e):
+        if (e.expr.match(EFunction(_))) {
+          var ret = e.pos.makeBlankType();
+          e = macro @:pos(e.pos) ($e:$original->$ret);
+        }
+        //TODO: the two cases look suspiciously similar
+        var rep = (macro @:pos(e.pos) $e((cast null:$original))).typeof().sure();
+        return macro @:pos(e.pos) {
+          var data = $e(data);
+          ${gen(rep)};
+        }
+    }
+  }
   
   function get() {
     var crawl = Crawler.crawl(dataType, pos, this);
