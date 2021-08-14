@@ -51,7 +51,7 @@ class GenBuilder {
   }
   
   public function wrap(placeholder:Expr, ct:ComplexType)
-    return placeholder.func(['prefix'.toArg(macro : String), 'buffer'.toArg(buffer), 'data'.toArg(ct)], false);    
+    return placeholder.func(['prefix'.toArg(macro : String), 'buffer'.toArg(buffer), 'keymaker'.toArg(macro : tink.querystring.Keymaker), 'data'.toArg(ct)], false);    
     
   public function nullable(e:Expr):Expr
     return macro @:pos(e.pos) if (data != null) $e;
@@ -91,23 +91,20 @@ class GenBuilder {
       }
       
       return macro @:pos(i.pos) {
-        var prefix = switch prefix {
-          case '': $v{formField};
-          case v: v + $v{'.'+formField};
-        }
+        var prefix = keymaker.field(prefix, $v{formField});
         var data = ${['data', i.name].drill(i.pos)};
         ${i.expr};
       }
 
     }
     
-    return [for (f in fields) info(f)].toBlock();    
+    return [for (f in fields) info(f)].toBlock();
   }
     
   public function array(e:Expr):Expr
     return (macro @:pos(e.pos) for (i in 0...data.length) {
       var data = data[i],
-          prefix = prefix + '[' + i + ']';
+          prefix = keymaker.index(prefix, i);
       $e;
     });
     
@@ -190,7 +187,9 @@ class GenBuilder {
       
       public function new() {}
       
-      public function stringify(data:$data) {
+      public function stringify(data:$data, ?keymaker:tink.querystring.Keymaker) {
+        if(keymaker == null)
+          keymaker = new tink.querystring.Keymaker.DefaultKeymaker();
         var prefix = '',
             buffer = new $bufName();//TODO: consider making this a stack variable
         ${crawl.expr};
