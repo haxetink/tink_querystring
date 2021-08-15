@@ -89,7 +89,7 @@ class GenParser {
         switch to {
           case macro : Int, macro : Float, macro : Date:
             var name = 'parse'+to.toString();
-            macro this.attempt(prefix, $stringly.$name());
+            macro this.attempt(name, $stringly.$name());
           default:
             macro ($stringly : $to);
         }
@@ -120,14 +120,17 @@ class GenParser {
       function getValue(p:tink.core.Named<$value>):$value return p.value;
 
       override public function parse(input:$input) {
-        var prefix = '';
         this.init(input, getName, getValue);
+        final name = '';
+        final field = tink.querystring.Parser.Field.Sub(root);
         return ${crawl.expr};
       }
 
     }
 
     ret.fields = ret.fields.concat(crawl.fields);
+    
+    // trace(new haxe.macro.Printer().printTypeDefinition(ret));
 
     return ret;
   }
@@ -139,19 +142,24 @@ class GenParser {
     return BuildCache.getType('tink.querystring.Parser', buildNew);
 
   public function wrap(placeholder:Expr, ct:ComplexType)
-    return placeholder.func(['prefix'.toArg(macro : String)], ct);
+    return placeholder.func(['name'.toArg(macro:String), 'field'.toArg(macro : tink.querystring.Parser.Field<$value>)], ct);
 
   public function nullable(e:Expr):Expr
     return
       macro
-        if (exists[prefix]) $e;
-        else null;
+        switch field {
+          case null: null;
+          case _: $e;
+        }
 
   function prim(wanted:ComplexType)
     return
-      macro
-        if (exists[prefix]) ((params[prefix]:$value):$wanted);
-        else missing(prefix);
+      macro 
+        switch field {
+          case null: missing(name);
+          case Sub(_): fail(name, 'unexpected object/array');
+          case Value(value): ((value:$value):$wanted);
+        }
 
   public function string():Expr
     return _string;
@@ -194,26 +202,40 @@ class GenParser {
         case v: f.pos.error('more than one @:default');
       }
 
-      var enter = (macro var prefix = switch prefix {
-        case '': $v{formField};
-        case v: v + $v{ '.' + formField};
-      });
+      var enter = (macro var
+        name = $v{formField},
+        tree = switch field {
+          case null: new tink.querystring.Parser.Tree();
+          case Value(_): fail(name, 'unexpected primitive');
+          case Sub(v): v;
+        }
+      );
 
       if (f.optional)
         optional.push(macro {
           $enter;
-          if (exists[prefix])
-            ${['__o', f.name].drill()} = ${f.expr};
-          else ${switch defaultValue {
-            case Some(v): ['__o', f.name].drill().assign(v);
-            default: null;
-          }};
+          switch tree[name] {
+            case null:
+              ${switch defaultValue {
+                case Some(v): ['__o', f.name].drill().assign(v);
+                default: macro null;
+              }}
+            case field:
+              ${['__o', f.name].drill()} = ${f.expr};
+          }
         })
       else {
         var value = switch defaultValue {
           case Some(v):
-            macro if (exists[prefix]) ${f.expr} else $v;
-          default: f.expr;
+            macro switch tree[name] {
+              case null: $v;
+              case field: ${f.expr}
+            }
+          default:
+            macro {
+              final field = tree[name];
+              ${f.expr};
+            }
         }
         ret.push({
           field: f.name,
@@ -233,22 +255,19 @@ class GenParser {
   }
 
   public function array(e:Expr):Expr {
-    return macro {
-
-      var counter = 0,
-          ret = [];
-
-      while (true) {
-        var prefix = prefix + '[' + counter + ']';
-
-        if (exists[prefix]) {
-          ret.push($e);
-          counter++;
-        }
-        else break;
-      }
-
-      ret;
+    return macro switch field {
+      case null:
+        missing(name);
+      case Value(_):
+        fail(name, 'unexpected primitive');
+      case Sub(tree):
+        var ret = [];
+        for(key => field in tree)
+          switch (key:tink.Stringly).parseInt() {
+            case Success(i): ret[i] = $e;
+            case Failure(_): // skip
+          }
+        ret;
     }
   }
   public function map(k:Expr, v:Expr):Expr {

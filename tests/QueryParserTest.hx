@@ -12,31 +12,31 @@ class QueryParserTest {
   
   public function new() {}
 
-  public function base() {
-    /*
-     * The keen observer may notice that the test below tests the implementation - which is why the `@:privateAccess` is there.
-     * This is not really necessary, but given that the macro generated parsers depend on it,
-     * it is helpful to test it in isolation, to be able to better locate bugs in the generated parsers.
-     */
-    var strings = [
-      'o%5B0%5D%5Ba%5D = 1 & o%5B1%5D%5Bc%5D = 1 & x.c = 3 & o%5B1%5D%5Bd%5D.x = 2 & o%5B0%5D%5Bb%5D = 2',
-      'o[0][a]=1 & o[1][c]= 1 & x.c =3 & o[1][d].x= 2& o[0][b] = 2',
-    ];
-    for (string in strings) {
-      var dummy = new ParserBase<Any, Portion, Any>();
+  // public function base() {
+  //   /*
+  //    * The keen observer may notice that the test below tests the implementation - which is why the `@:privateAccess` is there.
+  //    * This is not really necessary, but given that the macro generated parsers depend on it,
+  //    * it is helpful to test it in isolation, to be able to better locate bugs in the generated parsers.
+  //    */
+  //   var strings = [
+  //     'o%5B0%5D%5Ba%5D = 1 & o%5B1%5D%5Bc%5D = 1 & x.c = 3 & o%5B1%5D%5Bd%5D.x = 2 & o%5B0%5D%5Bb%5D = 2',
+  //     'o[0][a]=1 & o[1][c]= 1 & x.c =3 & o[1][d].x= 2& o[0][b] = 2',
+  //   ];
+  //   for (string in strings) {
+  //     var dummy = new ParserBase<Any, Portion, Any>();
       
-      var exists = @:privateAccess {
-        dummy.init(Query.parseString(string), function (p) return p.name, function (p) return p.value);
-        dummy.exists;
-      }
+  //     var exists = @:privateAccess {
+  //       dummy.init(Query.parseString(string), function (p) return p.name, function (p) return p.value);
+  //       dummy.exists;
+  //     }
       
-      var a = [for (k in exists.keys()) k];
-      a.sort(Reflect.compare);
+  //     var a = [for (k in exists.keys()) k];
+  //     a.sort(Reflect.compare);
       
-      asserts.assert('o,o[0],o[0][a],o[0][b],o[1],o[1][c],o[1][d],o[1][d].x,x,x.c' == a.join(','));
-    }
-    return asserts.done();
-  }
+  //     asserts.assert('o,o[0],o[0][a],o[0][b],o[1],o[1][c],o[1][d],o[1][d].x,x,x.c' == a.join(','));
+  //   }
+  //   return asserts.done();
+  // }
 
   public function formField() {
     var o:{
@@ -45,6 +45,33 @@ class QueryParserTest {
     asserts.assert('foo-bar=4' == tink.QueryString.build(o));
     o = tink.QueryString.parse('foo-bar=12');
     asserts.assert(12 == o.fooBar);
+    return asserts.done();
+  }
+  
+  public function anon() {
+    var p = new Parser<{x:Int, y:{?z:Int}}>();
+    var parsed = p.parse('x=1');
+    asserts.assert(parsed.x == 1);
+    asserts.assert(parsed.y.z == null);
+    var parsed = p.parse('x=1&y.z=2');
+    asserts.assert(parsed.x == 1);
+    asserts.assert(parsed.y.z == 2);
+    var parsed = p.parse('x=1&y[z]=2');
+    asserts.assert(parsed.x == 1);
+    asserts.assert(parsed.y.z == 2);
+    return asserts.done();
+  }
+  
+  public function array() {
+    var p = new Parser<{x:Array<Int>}>();
+    var parsed = p.parse('x[0]=1&x[1]=2');
+    asserts.assert(parsed.x[0] == 1);
+    asserts.assert(parsed.x[1] == 2);
+    
+    var p = new Parser<{?x:Array<Int>}>();
+    var parsed = p.parse('x[0]=1&x[1]=2');
+    asserts.assert(parsed.x[0] == 1);
+    asserts.assert(parsed.x[1] == 2);
     return asserts.done();
   }
   
@@ -57,7 +84,7 @@ class QueryParserTest {
     
     var p = new Parser<Nested>();    
     var parsed = p.parse(nestedString);
-    asserts.assert(tink.Json.stringify(nestedObject) == tink.Json.stringify(parsed));
+    asserts.compare(nestedObject, parsed);
     return asserts.done();
   }
   
