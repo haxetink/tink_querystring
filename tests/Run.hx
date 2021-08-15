@@ -8,6 +8,7 @@ class Run {
   static function main() {
     Runner.run(TestBatch.make([
       new QueryParserTest(),
+      new KeymakerTest(),
     ])).handle(Runner.exit);
   }
 

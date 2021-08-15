@@ -91,7 +91,10 @@ class GenBuilder {
       }
       
       return macro @:pos(i.pos) {
-        var prefix = keymaker.field(prefix, $v{formField});
+        var prefix = switch prefix {
+          case '': $v{formField};
+          case v: keymaker.field(v, $v{formField});
+        }
         var data = ${['data', i.name].drill(i.pos)};
         ${i.expr};
       }
