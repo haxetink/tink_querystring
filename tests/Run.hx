@@ -7,7 +7,7 @@ class Run {
   
   static function main() {
     Runner.run(TestBatch.make([
-      // new NormalizerTest(),
+      new NormalizerTest(),
       new QueryParserTest(),
     ])).handle(Runner.exit);
   }
