@@ -156,7 +156,6 @@ class GenParser {
     return
       macro 
         switch field {
-          case null: missing(name);
           case Sub(_): fail(name, 'unexpected object/array');
           case Value(value): ((value:$value):$wanted);
         }
@@ -202,14 +201,7 @@ class GenParser {
         case v: f.pos.error('more than one @:default');
       }
 
-      var enter = (macro var
-        name = $v{formField},
-        tree = switch field {
-          case null: new tink.querystring.Parser.Tree();
-          case Value(_): fail(name, 'unexpected primitive');
-          case Sub(v): v;
-        }
-      );
+      var enter = (macro var name = $v{formField});
 
       if (f.optional)
         optional.push(macro {
@@ -248,6 +240,11 @@ class GenParser {
     }
 
     return macro {
+      final tree = switch field {
+        case null: new tink.querystring.Parser.Tree(); // example: for `{x:{?y:Int}}` we want to be able to parse an empty input into `{x: {}}`
+        case Value(_): fail(name, 'unexpected primitive');
+        case Sub(v): v;
+      }
       var __o:$ct = ${EObjectDecl(ret).at()};
       $b{optional};
       __o;
@@ -255,19 +252,19 @@ class GenParser {
   }
 
   public function array(e:Expr):Expr {
-    return macro switch field {
-      case null:
-        missing(name);
-      case Value(_):
-        fail(name, 'unexpected primitive');
-      case Sub(tree):
-        var ret = [];
-        for(key => field in tree)
-          switch (key:tink.Stringly).parseInt() {
-            case Success(i): ret[i] = $e;
-            case Failure(_): // skip
-          }
-        ret;
+    return macro {
+      final tree = switch field {
+        case null: new tink.querystring.Parser.Tree(); // example: for `{x:Array<Int>}` we want to be able to parse an empty input into `{x: []}`
+        case Value(_): fail(name, 'unexpected primitive');
+        case Sub(v): v;
+      }
+      final ret = [];
+      for(key => field in tree)
+        switch (key:tink.Stringly).parseInt() {
+          case Success(i): ret[i] = $e;
+          case Failure(_): // skip
+        }
+      ret;
     }
   }
   public function map(k:Expr, v:Expr):Expr {

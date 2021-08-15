@@ -64,12 +64,16 @@ class QueryParserTest {
   
   public function array() {
     var p = new Parser<{x:Array<Int>}>();
-    var parsed = p.parse('x[0]=1&x[1]=2');
+    var parsed = p.parse('x[0]=1&x.1=2');
     asserts.assert(parsed.x[0] == 1);
     asserts.assert(parsed.x[1] == 2);
     
+    var p = new Parser<{x:Array<Int>}>();
+    var parsed = p.parse('');
+    asserts.assert(parsed.x.length == 0);
+    
     var p = new Parser<{?x:Array<Int>}>();
-    var parsed = p.parse('x[0]=1&x[1]=2');
+    var parsed = p.parse('x[0]=1&x.1=2');
     asserts.assert(parsed.x[0] == 1);
     asserts.assert(parsed.x[1] == 2);
     return asserts.done();
@@ -82,7 +86,7 @@ class QueryParserTest {
     o = tink.QueryString.parse(tink.QueryString.build(o));
     asserts.assert(old == o.date.getTime());
     
-    var p = new Parser<Nested>();    
+    var p = new Parser<Nested>();
     var parsed = p.parse(nestedString);
     asserts.compare(nestedObject, parsed);
     return asserts.done();
