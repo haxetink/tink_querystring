@@ -1,7 +1,9 @@
 -cp tests
 -main Run
 -dce full
+
 -lib tink_json
 -lib tink_unittest
+-lib deep_equal
 
 -D no-deprecation-warnings
