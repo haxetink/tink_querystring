@@ -9,6 +9,7 @@ class Run {
     Runner.run(TestBatch.make([
       new NormalizerTest(),
       new QueryParserTest(),
+      new KeymakerTest(),
     ])).handle(Runner.exit);
   }
 
