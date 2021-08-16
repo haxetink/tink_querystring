@@ -58,24 +58,24 @@ class QueryBuilderTest {
   
   public function dyn() {
     var b = new Builder<{x:Dynamic<String>}>();
-    var s = b.stringify({x: {foo: 'foo', bar: 'bar'}});
-    asserts.assert(s == 'x.foo=foo&x.bar=bar');
+    var s = b.stringify({x: {bar: 'bar', foo: 'foo'}});
+    asserts.assert(s == 'x.bar=bar&x.foo=foo');
     
     var b = new Builder<{x:Dynamic<Int>}>();
-    var s = b.stringify({x: {foo: 1, bar: 2}});
-    asserts.assert(s == 'x.foo=1&x.bar=2');
+    var s = b.stringify({x: {bar: 2, foo: 1}});
+    asserts.assert(s == 'x.bar=2&x.foo=1');
     
     return asserts.done();
   }
   
   public function dynAccess() {
     var b = new Builder<{x:DynamicAccess<String>}>();
-    var s = b.stringify({x: {foo: 'foo', bar: 'bar'}});
-    asserts.assert(s == 'x.foo=foo&x.bar=bar');
+    var s = b.stringify({x: {bar: 'bar', foo: 'foo'}});
+    asserts.assert(s == 'x.bar=bar&x.foo=foo');
     
     var b = new Builder<{x:DynamicAccess<Int>}>();
-    var s = b.stringify({x: {foo: 1, bar: 2}});
-    asserts.assert(s == 'x.foo=1&x.bar=2');
+    var s = b.stringify({x: {bar: 2, foo: 1}});
+    asserts.assert(s == 'x.bar=2&x.foo=1');
     
     return asserts.done();
   }
