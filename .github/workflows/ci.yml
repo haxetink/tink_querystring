@@ -21,7 +21,7 @@ jobs:
           - python
           - node
           - js
-          - cs
+          - cs -D erase-generics
           - php
           - cpp
           - jvm
