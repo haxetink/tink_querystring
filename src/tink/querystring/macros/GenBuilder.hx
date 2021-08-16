@@ -85,7 +85,7 @@ class GenBuilder {
     return prim;
     
   public function bytes():Expr
-    return throw 'not implemented';
+    return macro @:pos(pos) buffer.add(prefix, haxe.crypto.Base64.urlEncode(data));
     
   public function anon(fields:Array<FieldInfo>, ct:ComplexType) {
     

@@ -2,6 +2,7 @@ package;
 
 import tink.querystring.Builder;
 import haxe.DynamicAccess;
+import haxe.io.Bytes;
 
 using tink.CoreApi;
 using StringTools;
@@ -56,11 +57,11 @@ class QueryBuilderTest {
   // }
   
   public function dyn() {
-    var b = new Builder<{x: Dynamic<String>}>();
+    var b = new Builder<{x:Dynamic<String>}>();
     var s = b.stringify({x: {foo: 'foo', bar: 'bar'}});
     asserts.assert(s == 'x.foo=foo&x.bar=bar');
     
-    var b = new Builder<{x: Dynamic<Int>}>();
+    var b = new Builder<{x:Dynamic<Int>}>();
     var s = b.stringify({x: {foo: 1, bar: 2}});
     asserts.assert(s == 'x.foo=1&x.bar=2');
     
@@ -68,13 +69,21 @@ class QueryBuilderTest {
   }
   
   public function dynAccess() {
-    var b = new Builder<{x: DynamicAccess<String>}>();
+    var b = new Builder<{x:DynamicAccess<String>}>();
     var s = b.stringify({x: {foo: 'foo', bar: 'bar'}});
     asserts.assert(s == 'x.foo=foo&x.bar=bar');
     
-    var b = new Builder<{x: DynamicAccess<Int>}>();
+    var b = new Builder<{x:DynamicAccess<Int>}>();
     var s = b.stringify({x: {foo: 1, bar: 2}});
     asserts.assert(s == 'x.foo=1&x.bar=2');
+    
+    return asserts.done();
+  }
+  
+  public function bytes() {
+    var b = new Builder<{x:Bytes}>();
+    var s = b.stringify({x: Bytes.ofString('ABCD')});
+    asserts.assert(s == 'x=QUJDRA');
     
     return asserts.done();
   }

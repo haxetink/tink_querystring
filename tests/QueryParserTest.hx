@@ -5,6 +5,8 @@ import tink.url.Portion;
 import tink.url.Query;
 import tink.querystring.Parser;
 import haxe.DynamicAccess;
+import haxe.io.Bytes;
+
 using tink.CoreApi;
 using StringTools;
 
@@ -118,6 +120,14 @@ class QueryParserTest {
     var parsed = p.parse('x[foo]=0&x.bar=1');
     asserts.assert(parsed.x['foo'] == 0);
     asserts.assert(parsed.x['bar'] == 1);
+    
+    return asserts.done();
+  }
+  
+  public function bytes() {
+    var p = new Parser<{x:Bytes}>();
+    var parsed = p.parse('x=QUJDRA');
+    asserts.assert(parsed.x.toString() == 'ABCD');
     
     return asserts.done();
   }

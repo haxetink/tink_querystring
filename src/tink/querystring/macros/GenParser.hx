@@ -193,7 +193,12 @@ class GenParser {
     return _date;
 
   public function bytes():Expr
-    return pos.errorExpr('Bytes parsing not implemented');
+    return
+      macro 
+        switch field {
+          case Sub(_): fail(name, 'unexpected object/array');
+          case Value(value): haxe.crypto.Base64.urlDecode(value);
+        }
 
   public function anon(fields:Array<FieldInfo>, ct:ComplexType):Expr {
     var ret = [],
