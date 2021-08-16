@@ -170,10 +170,21 @@ class GenParser {
     return _int;
 
   public function dyn(e:Expr, ct:ComplexType):Expr
-    return pos.error('Dynamic<T> parsing not implemented');
+    return macro ($e : Dynamic<$ct>);
 
-  public function dynAccess(e:Expr):Expr
-    return pos.error('haxe.DynamicAccess<T> parsing not implemented');
+  public function dynAccess(e:Expr):Expr {
+    return macro {
+      final tree = switch field {
+        case null: new tink.querystring.Parser.Tree();
+        case Value(_): fail(name, 'unexpected primitive');
+        case Sub(v): v;
+      }
+      final ret = new haxe.DynamicAccess();
+      for(key => field in tree) 
+        ret.set(key, $e);
+      ret;
+    }
+  }
 
   public function bool():Expr
     return _bool;
@@ -260,16 +271,24 @@ class GenParser {
       }
       final ret = [];
       for(key => field in tree)
-        switch (key:tink.Stringly).parseInt() {
-          case Success(i): ret[i] = $e;
-          case Failure(_): // skip
-        }
+        ret[((key:tink.Stringly):Int)] = $e;
       ret;
     }
   }
   public function map(k:Expr, v:Expr):Expr {
-    return pos.error('Map parsing not implemented');
+    return macro {
+      final tree = switch field {
+        case null: new tink.querystring.Parser.Tree(); // example: for `{x:Map<?, ?>}` we want to be able to parse an empty input into `{x: []}`
+        case Value(_): fail(name, 'unexpected primitive');
+        case Sub(v): v;
+      }
+      final ret = new Map();
+      for(key => field in tree) 
+        ret.set({final field = tink.querystring.Parser.Field.Value(key); $k; /* TODO: find a way to eliminate the extra wrapping */}, $v);
+      ret;
+    }
   }
+  
   public function enm(constructors:Array<EnumConstructor>, ct:ComplexType, pos:Position, gen:GenType):Expr {
     return pos.error('Enum parsing not implemented');
   }

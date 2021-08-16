@@ -69,10 +69,17 @@ class GenBuilder {
     return prim;
   
   public function dyn(e:Expr, ct:ComplexType):Expr
-    return throw 'not implemented';
+    return macro {
+      var data:haxe.DynamicAccess<$ct> = data;
+      $e;
+    }
     
-  public function dynAccess(e:Expr):Expr
-    return throw 'not implemented';
+  public function dynAccess(e:Expr):Expr {
+    return (macro @:pos(e.pos) for (key => data in data) {
+      final prefix = keymaker.field(prefix, key);
+      $e;
+    });
+  }
     
   public function date():Expr
     return prim;
@@ -104,15 +111,22 @@ class GenBuilder {
     return [for (f in fields) info(f)].toBlock();
   }
     
-  public function array(e:Expr):Expr
-    return (macro @:pos(e.pos) for (i in 0...data.length) {
-      var data = data[i],
-          prefix = keymaker.index(prefix, i);
+  public function array(e:Expr):Expr {
+    return (macro @:pos(e.pos) for (i => data in data) {
+      final prefix = keymaker.index(prefix, i);
       $e;
     });
+  }
     
-  public function map(k:Expr, v:Expr):Expr
-    return throw 'not implemented';
+  public function map(k:Expr, v:Expr):Expr {
+    return (macro @:pos(k.pos) for (key => data in data) {
+      final prefix = keymaker.field(prefix, {
+        final data = key;
+        $k;
+      });
+      prefix => $v;
+    });
+  }
     
   public function enm(constructors:Array<EnumConstructor>, ct:ComplexType, pos:Position, gen:GenType):Expr
     return throw 'not implemented';
@@ -202,6 +216,8 @@ class GenBuilder {
     }
     
     ret.fields = ret.fields.concat(crawl.fields);
+    
+    // trace(new haxe.macro.Printer().printTypeDefinition(ret));
     
     return ret;    
   }  

@@ -4,6 +4,7 @@ import tink.QueryString;
 import tink.url.Portion;
 import tink.url.Query;
 import tink.querystring.Parser;
+import haxe.DynamicAccess;
 using tink.CoreApi;
 using StringTools;
 
@@ -76,6 +77,48 @@ class QueryParserTest {
     var parsed = p.parse('x[0]=1&x.1=2');
     asserts.assert(parsed.x[0] == 1);
     asserts.assert(parsed.x[1] == 2);
+    return asserts.done();
+  }
+  
+  public function map() {
+    var p = new Parser<{x:Map<Int, String>}>();
+    var parsed = p.parse('x[0]=foo&x.1=bar');
+    asserts.assert(parsed.x[0] == 'foo');
+    asserts.assert(parsed.x[1] == 'bar');
+    
+    var p = new Parser<{x:Map<String, Int>}>();
+    var parsed = p.parse('x[foo]=0&x.bar=1');
+    asserts.assert(parsed.x['foo'] == 0);
+    asserts.assert(parsed.x['bar'] == 1);
+    
+    return asserts.done();
+  }
+  
+  public function dyn() {
+    var p = new Parser<{x:Dynamic<String>}>();
+    var parsed = p.parse('x[foo]=foo&x.bar=bar');
+    asserts.assert(parsed.x.foo == 'foo');
+    asserts.assert(parsed.x.bar == 'bar');
+    
+    var p = new Parser<{x:Dynamic<Int>}>();
+    var parsed = p.parse('x[foo]=0&x.bar=1');
+    asserts.assert(parsed.x.foo == 0);
+    asserts.assert(parsed.x.bar == 1);
+    
+    return asserts.done();
+  }
+  
+  public function dynAccess() {
+    var p = new Parser<{x:DynamicAccess<String>}>();
+    var parsed = p.parse('x[foo]=foo&x.bar=bar');
+    asserts.assert(parsed.x['foo'] == 'foo');
+    asserts.assert(parsed.x['bar'] == 'bar');
+    
+    var p = new Parser<{x:DynamicAccess<Int>}>();
+    var parsed = p.parse('x[foo]=0&x.bar=1');
+    asserts.assert(parsed.x['foo'] == 0);
+    asserts.assert(parsed.x['bar'] == 1);
+    
     return asserts.done();
   }
   
