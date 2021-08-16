@@ -7,3 +7,4 @@
 -lib deep_equal
 
 -D no-deprecation-warnings
+-D analyzer-optimize

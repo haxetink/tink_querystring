@@ -64,6 +64,24 @@ enum Field<V> {
 }
 
 class FieldTools {
+  
+  public static function getSub<V>(field:Field<V>, substitute = true):Tree<V> {
+    return
+      if(substitute && field == null)
+        new Tree();  // example: for `{x:Array<Int>}` we want to be able to parse an empty input into `{x: []}`
+      else switch field {
+        case Sub(v): v;
+        case Value(_): throw 'unexpected primitive';
+      }
+  }
+  
+  public static function getValue<V>(field:Field<V>):V {
+    return switch field {
+      case Sub(_):  throw 'unexpected object/array';
+      case Value(v): v;
+    }
+  }
+  
   public static function toString<V>(f:Field<V>):String {
     return switch f {
       case Value(v): Std.string(v);

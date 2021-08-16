@@ -153,12 +153,7 @@ class GenParser {
         }
 
   function prim(wanted:ComplexType)
-    return
-      macro 
-        switch field {
-          case Sub(_): fail(name, 'unexpected object/array');
-          case Value(value): ((value:$value):$wanted);
-        }
+    return macro (field.getValue():$wanted);
 
   public function string():Expr
     return _string;
@@ -193,12 +188,7 @@ class GenParser {
     return _date;
 
   public function bytes():Expr
-    return
-      macro 
-        switch field {
-          case Sub(_): fail(name, 'unexpected object/array');
-          case Value(value): haxe.crypto.Base64.urlDecode(value);
-        }
+    return macro haxe.crypto.Base64.urlDecode(field.getValue());
 
   public function anon(fields:Array<FieldInfo>, ct:ComplexType):Expr {
     var ret = [],
@@ -256,11 +246,7 @@ class GenParser {
     }
 
     return macro {
-      final tree = switch field {
-        case null: new tink.querystring.Parser.Tree(); // example: for `{x:{?y:Int}}` we want to be able to parse an empty input into `{x: {}}`
-        case Value(_): fail(name, 'unexpected primitive');
-        case Sub(v): v;
-      }
+      final tree = field.getSub();
       var __o:$ct = ${EObjectDecl(ret).at()};
       $b{optional};
       __o;
@@ -269,11 +255,7 @@ class GenParser {
 
   public function array(e:Expr):Expr {
     return macro {
-      final tree = switch field {
-        case null: new tink.querystring.Parser.Tree(); // example: for `{x:Array<Int>}` we want to be able to parse an empty input into `{x: []}`
-        case Value(_): fail(name, 'unexpected primitive');
-        case Sub(v): v;
-      }
+      final tree = field.getSub();
       final ret = [];
       for(key => field in tree)
         ret[((key:tink.Stringly):Int)] = $e;
@@ -282,11 +264,7 @@ class GenParser {
   }
   public function map(k:Expr, v:Expr):Expr {
     return macro {
-      final tree = switch field {
-        case null: new tink.querystring.Parser.Tree(); // example: for `{x:Map<?, ?>}` we want to be able to parse an empty input into `{x: []}`
-        case Value(_): fail(name, 'unexpected primitive');
-        case Sub(v): v;
-      }
+      final tree = field.getSub();
       final ret = new Map();
       for(key => field in tree) 
         ret.set({final field = tink.querystring.Parser.Field.Value(key); $k; /* TODO: find a way to eliminate the extra wrapping */}, $v);
