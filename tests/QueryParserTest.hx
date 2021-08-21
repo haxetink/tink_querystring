@@ -132,6 +132,13 @@ class QueryParserTest {
     return asserts.done();
   }
   
+  public function obj() {
+    final o:Final = tink.QueryString.parse('foo=1');
+    asserts.assert(o.foo == 1);
+    asserts.assert(o.bar == null);
+    return asserts.done();
+  }
+  
   public function parse() {
     var o = { date: #if (cpp || cs) new Date(2017,5,5,0,0,0) #else Date.now() #end }; // TODO: cpp/cs precision issue
     var old = o.date.getTime();
@@ -145,7 +152,12 @@ class QueryParserTest {
     return asserts.done();
   }
   
-  static var nestedObject:Nested = { foo: [ { z: .0 }, { x: '100%', z: .1 }, { y: [{i:4}], z: .2 }, { x: 'yo', y: [{i:5}, {i:6}], z: 1.5e100 } ] };
+  static var nestedObject:Nested = { foo: [
+    { x: null, y: null, z: .0 },
+    { x: '100%', y: null, z: .1 },
+    { x: null, y: [{i:4}], z: .2 },
+    { x: 'yo', y: [{i:5}, {i:6}], z: 1.5e100 }
+  ] };
   static var nestedString = 'foo[0].z=.0&foo[1].x=100%25&foo[1].z=.1&foo[2].y[0].i=4&foo[2].z=.2&foo[3].x=yo&foo[3].y[0].i=5&foo[3].y[1].i=6&foo[3].z=1.5e%2B100';
   
   public function facade() {
@@ -188,11 +200,11 @@ class QueryParserTest {
 }
 
 typedef Nested = { 
-  foo: Array<{ 
-    ?x: String, 
-    ?y:Array<{ i: Int }>, 
-    z:Float,
-  }> 
+  final foo: Array<{ 
+    final ?x:String;
+    final ?y:Array<{ i: Int }>;
+    final z:Float;
+  }>;
 }
 
 @:enum
@@ -209,4 +221,9 @@ class Custom {
   public function new(i) {
     this.i = i;
   }
+}
+
+typedef Final = {
+  final foo:Int;
+  final ?bar:Int;
 }
