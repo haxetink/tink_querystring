@@ -209,40 +209,26 @@ class GenParser {
 
       var enter = (macro var name = $v{formField});
 
-      if (f.optional)
-        optional.push(macro {
-          $enter;
-          switch tree[name] {
-            case null:
-              ${switch defaultValue {
-                case Some(v): ['__o', f.name].drill().assign(v);
-                default: macro null;
-              }}
-            case field:
-              ${['__o', f.name].drill()} = ${f.expr};
+      var value = switch defaultValue {
+        case Some(v):
+          macro switch tree[name] {
+            case null: $v;
+            case field: ${f.expr}
           }
-        })
-      else {
-        var value = switch defaultValue {
-          case Some(v):
-            macro switch tree[name] {
-              case null: $v;
-              case field: ${f.expr}
-            }
-          default:
-            macro {
-              final field = tree[name];
-              ${f.expr};
-            }
-        }
-        ret.push({
-          field: f.name,
-          expr: macro {
-            $enter;
-            $value;
+        default:
+          macro {
+            final field = tree[name];
+            ${f.expr};
           }
-        });
       }
+      ret.push({
+        field: f.name,
+        expr: macro {
+          $enter;
+          $value;
+        }
+      });
+      
     }
 
     return macro {
