@@ -280,8 +280,8 @@ class GenParser {
     return Some(
       macro
         try ${prim(t.toComplex())}
-        catch (e:tink.core.Error) this.fail(prefix, e.message)
-        catch (e:Dynamic) this.fail(prefix, Std.string(e))
+        catch (e:tink.core.Error) this.fail(name + ':' + field, e.message)
+        catch (e:Dynamic) this.fail(name + ':' + field, Std.string(e))
     );
   }
 

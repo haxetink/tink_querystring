@@ -152,6 +152,12 @@ class QueryParserTest {
     return asserts.done();
   }
   
+  public function rescue() {
+    final o:{foo:Timezone} = tink.QueryString.parse('foo=1');
+    asserts.assert(o.foo == untyped 1);
+    return asserts.done();
+  }
+  
   static var nestedObject:Nested = { foo: [
     { x: null, y: null, z: .0 },
     { x: '100%', y: null, z: .1 },
@@ -226,4 +232,29 @@ class Custom {
 typedef Final = {
   final foo:Int;
   final ?bar:Int;
+}
+
+abstract Timezone(Second) {
+  function new(v:Second) this = v;
+  
+  #if tink_stringly
+  @:to
+  public inline function toStringly():tink.Stringly
+    return this.toFloat();
+
+  @:from
+  public static inline function fromStringly(v:tink.Stringly):Timezone
+    return new Timezone(new Second(v));
+  #end
+
+  #if tink_url
+  @:from
+  public static inline function fromPortion(v:tink.url.Portion):Timezone
+    return fromStringly(v);
+  #end
+}
+
+abstract Second(Float) {
+  public function new(v) this = v;
+  public inline function toFloat() return this;
 }
