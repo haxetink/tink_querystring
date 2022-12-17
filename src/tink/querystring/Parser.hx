@@ -145,6 +145,7 @@ class DefaultNormalizer<Input, Output> implements Normalizer<Input, Output> {
           
           switch tree[field] {
             case null: tree[field] = Value(value);
+            case Value(v) if(v == value): // no-op
             case v: throw 'conflict: $field is already defined as $v';
           }
           
