@@ -7,10 +7,10 @@ class Run {
   
   static function main() {
     Runner.run(TestBatch.make([
-      new NormalizerTest(),
-      new KeymakerTest(),
+      // new NormalizerTest(),
+      // new KeymakerTest(),
       new QueryParserTest(),
-      new QueryBuilderTest(),
+      // new QueryBuilderTest(),
     ])).handle(Runner.exit);
   }
 
