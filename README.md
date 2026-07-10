@@ -1,7 +1,6 @@
 # Tinkerbell Querystringmanglingthing
 
 [![Build Status](https://github.com/haxetink/tink_querystring/actions/workflows/ci.yml/badge.svg)](https://github.com/haxetink/tink_querystring/actions)
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/haxetink/public)
 
 
 This library provides the means to parse and build query strings - or similar structures - into or from complex Haxe objects in a type-safe reflection-free way.
@@ -62,4 +61,18 @@ trace(tink.QueryString.build({ hello:'world', blabla: [1,2,3] }));//blabla[0]=1&
 
 ## Builder Details
 
-... to be documented
+`QueryString.build` is a macro helper for `tink.querystring.Builder`. You can also use the builder directly and pass a custom `Keymaker`:
+
+```haxe
+var builder = new Builder<{x:{y:Int, z:Array<Int>}}>();
+builder.stringify({x:{y:1, z:[2]}}); // x.y=1&x.z%5B0%5D=2
+builder.stringify({x:{y:1, z:[2]}}, new BracketKeymaker()); // x%5By%5D=1&x%5Bz%5D%5B0%5D=2
+```
+
+Field metadata:
+
+- `@:formField('foo-bar')` — use a different wire name than the field name
+- `@:default(12)` — value when the field is absent from the input
+- `@:queryParse(fn)` / `@:queryStringify(fn)` — custom parse/stringify hooks for a type
+
+Map keys must be implicitly convertible to `tink.Stringly` (`String`, `Int`, `Bool`, `Float`, `Date`, and Stringly-based enum abstracts).

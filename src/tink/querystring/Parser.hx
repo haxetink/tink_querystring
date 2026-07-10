@@ -137,7 +137,7 @@ class DefaultNormalizer<Input, Output> implements Normalizer<Input, Output> {
   function iterate(tree:Tree<Output>, key:String, value:Output, depth = 0) {
     // trace(haxe.Json.stringify(key), 1);
     if(depth == 0) {
-      if(key == '') return; // this should probably throw
+      if(key == '') throw 'empty key';
       
       switch [key.indexOf('['), key.indexOf('.')] {
         case [-1, -1]:
@@ -235,7 +235,6 @@ class DefaultNormalizer<Input, Output> implements Normalizer<Input, Output> {
             }
             
           case [i, -1] | [-1, i]:
-            trace('here');
             final field = key.substring(1, i);
             
             final sub = switch tree[field] {

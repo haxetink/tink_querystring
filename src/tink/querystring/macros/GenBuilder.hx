@@ -8,6 +8,7 @@ import tink.typecrawler.Crawler;
 import tink.typecrawler.FieldInfo;
 import tink.typecrawler.Generator;
 
+using haxe.macro.TypeTools;
 using Lambda;
 using tink.CoreApi;
 using tink.MacroApi;
@@ -24,6 +25,7 @@ class GenBuilder {
   var bufferType:Type;
   
   static final CUSTOM_META = ':queryStringify';
+  static final MAP_KEY_IDENT = 'key';
   
   function new(name, rawType:Type, pos) {
     
@@ -75,8 +77,8 @@ class GenBuilder {
     }
     
   public function dynAccess(e:Expr):Expr {
-    return (macro @:pos(e.pos) for (key => data in data) {
-      final prefix = keymaker.field(prefix, key);
+    return (macro @:pos(e.pos) for ($i{MAP_KEY_IDENT} => data in data) {
+      final prefix = keymaker.field(prefix, $i{MAP_KEY_IDENT});
       $e;
     });
   }
@@ -120,11 +122,8 @@ class GenBuilder {
     
   public function map(k:Expr, v:Expr):Expr {
     return (macro @:pos(k.pos) for (key => data in data) {
-      final prefix = keymaker.field(prefix, {
-        final data = key;
-        $k;
-      });
-      prefix => $v;
+      final prefix = keymaker.field(prefix, $k);
+      $v;
     });
   }
     
@@ -156,22 +155,27 @@ class GenBuilder {
     return Helper.shouldIncludeField(c, owner);
 
   public function drive(type:Type, pos:Position, gen:Type->Position->Expr):Expr {
-    return switch type.getMeta().fold((current, all:Array<MetadataEntry>) -> all.concat(current.extract(CUSTOM_META)), []) {
-      case []:
-        gen(type, pos);
-      case _[0] => { params: [custom] }:
-        var rule:CustomRule =
-          switch custom {
-            case { expr: EFunction(_, _) }: WithFunction(custom);
-            // case { expr: EParenthesis({ expr: ECheckType(_, TPath(path)) }) }: WithClass(path, custom.pos);
-            case _ if(custom.typeof().sure().reduce().match(TFun(_, _))): WithFunction(custom);
-            // default: WithClass(custom.toString().asTypePath(), custom.pos);
-            case _: custom.pos.error('unsupported');
-          }
-        processCustom(rule, type, drive.bind(_, pos, gen));
-      case _[0] => { pos: pos }:
-        pos.error('Invalid use of @$CUSTOM_META');
-        
+    return switch type.reduce() {
+      case TAbstract(_.get() => { name: 'Map', pack: [] | ['haxe', 'ds']}, [k, v]):
+        var kct = k.toComplex();
+        if (!(macro ((null:$kct):tink.Stringly)).typeof().isSuccess())
+          pos.error('Map key type ${k.toString()} must be implicitly convertible to tink.Stringly');
+        map(macro ($i{MAP_KEY_IDENT} : tink.Stringly), drive(v, pos, gen));
+      default:
+        switch type.getMeta().fold((current, all:Array<MetadataEntry>) -> all.concat(current.extract(CUSTOM_META)), []) {
+          case []:
+            gen(type, pos);
+          case _[0] => { params: [custom] }:
+            var rule:CustomRule =
+              switch custom {
+                case { expr: EFunction(_, _) }: WithFunction(custom);
+                case _ if(custom.typeof().sure().reduce().match(TFun(_, _))): WithFunction(custom);
+                case _: custom.pos.error('unsupported');
+              }
+            processCustom(rule, type, drive.bind(_, pos, gen));
+          case _[0] => { pos: pos }:
+            pos.error('Invalid use of @$CUSTOM_META');
+        }
     }
   }
   

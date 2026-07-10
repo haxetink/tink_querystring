@@ -293,22 +293,27 @@ class GenParser {
     return Helper.shouldIncludeField(c, owner);
 
   public function drive(type:Type, pos:Position, gen:Type->Position->Expr):Expr {
-    return switch type.getMeta().fold((current, all:Array<MetadataEntry>) -> all.concat(current.extract(CUSTOM_META)), []) {
-      case []:
-        gen(type, pos);
-      case _[0] => { params: [custom] }:
-        var rule:CustomRule =
-          switch custom {
-            case { expr: EFunction(_, _) }: WithFunction(custom);
-            // case { expr: EParenthesis({ expr: ECheckType(_, TPath(path)) }) }: WithClass(path, custom.pos);
-            case _ if(custom.typeof().sure().reduce().match(TFun(_, _))): WithFunction(custom);
-            // default: WithClass(custom.toString().asTypePath(), custom.pos);
-            case _: custom.pos.error('unsupported');
-          }
-        processCustom(rule, type, drive.bind(_, pos, gen));
-      case _[0] => { pos: pos }:
-        pos.error('Invalid use of @$CUSTOM_META');
-        
+    return switch type.reduce() {
+      case TAbstract(_.get() => { name: 'Map', pack: [] | ['haxe', 'ds']}, [k, v]):
+        var kct = k.toComplex();
+        if (!(macro ((null:$kct):tink.Stringly)).typeof().isSuccess())
+          pos.error('Map key type ${k.toString()} must be implicitly convertible to tink.Stringly');
+        map(gen(k, pos), drive(v, pos, gen));
+      default:
+        switch type.getMeta().fold((current, all:Array<MetadataEntry>) -> all.concat(current.extract(CUSTOM_META)), []) {
+          case []:
+            gen(type, pos);
+          case _[0] => { params: [custom] }:
+            var rule:CustomRule =
+              switch custom {
+                case { expr: EFunction(_, _) }: WithFunction(custom);
+                case _ if(custom.typeof().sure().reduce().match(TFun(_, _))): WithFunction(custom);
+                case _: custom.pos.error('unsupported');
+              }
+            processCustom(rule, type, drive.bind(_, pos, gen));
+          case _[0] => { pos: pos }:
+            pos.error('Invalid use of @$CUSTOM_META');
+        }
     }
   }
   

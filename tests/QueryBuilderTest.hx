@@ -1,6 +1,7 @@
 package;
 
 import tink.querystring.Builder;
+import tink.querystring.Parser;
 import haxe.DynamicAccess;
 import haxe.io.Bytes;
 
@@ -43,18 +44,27 @@ class QueryBuilderTest {
     return asserts.done();
   }
   
-  // public function map() {
-  //   var b = new Builder<{x:Map<Int, String>}>();
-  //   var s = b.stringify({x: [1 => 'foo', 2 => 'bar']});
-  //   asserts.assert(s == 'x%5B0%5D=1&x%5B1%5D=2');
-    
-  //   var b = new Builder<{x:Map<String, Int>}>();
-  //   var parsed = b.parse('x[foo]=0&x.bar=1');
-  //   asserts.assert(parsed.x['foo'] == 0);
-  //   asserts.assert(parsed.x['bar'] == 1);
-    
-  //   return asserts.done();
-  // }
+  public function map() {
+    var b = new Builder<{x:Map<Int, String>}>();
+    var s = b.stringify({x: [1 => 'foo', 2 => 'bar']});
+    var entries = s.split('&');
+    asserts.assert(entries.contains('x.1=foo'));
+    asserts.assert(entries.contains('x.2=bar'));
+    var parsed = new Parser<{x:Map<Int, String>}>().parse(s);
+    asserts.assert(parsed.x[1] == 'foo');
+    asserts.assert(parsed.x[2] == 'bar');
+
+    var b = new Builder<{x:Map<String, Int>}>();
+    var s = b.stringify({x: ['foo' => 0, 'bar' => 1]});
+    entries = s.split('&');
+    asserts.assert(entries.contains('x.foo=0'));
+    asserts.assert(entries.contains('x.bar=1'));
+    var parsed = new Parser<{x:Map<String, Int>}>().parse(s);
+    asserts.assert(parsed.x['foo'] == 0);
+    asserts.assert(parsed.x['bar'] == 1);
+
+    return asserts.done();
+  }
   
   public function dyn() {
     var b = new Builder<{x:Dynamic<String>}>();
