@@ -3,8 +3,9 @@ package;
 import tink.QueryString;
 import tink.url.Portion;
 import tink.url.Query;
+import tink.querystring.Normalizer;
+import tink.querystring.Normalizer.DefaultNormalizer;
 import tink.querystring.Parser;
-import tink.querystring.Parser.DefaultNormalizer;
 import haxe.DynamicAccess;
 import haxe.io.Bytes;
 
@@ -29,6 +30,28 @@ class QueryParserTest {
   asserts.compare(trees[0], trees[1]);
   return asserts.done();
 }
+
+  public function normalizer() {
+    final p = new Parser<{x:Int, y:{?z:Int}}>();
+    final s = 'x=1&y.z=2';
+
+    final withDefault = p.parse(s, new DefaultNormalizer());
+    final without = p.parse(s);
+    asserts.assert(withDefault.x == without.x);
+    asserts.assert(withDefault.y.z == without.y.z);
+
+    final wrapper = new CountingNormalizer();
+    final viaWrapper = p.parse(s, wrapper);
+    asserts.assert(wrapper.calls == 1);
+    asserts.assert(viaWrapper.x == 1);
+    asserts.assert(viaWrapper.y.z == 2);
+
+    final tried = p.tryParse(s, wrapper);
+    asserts.assert(wrapper.calls == 2);
+    asserts.assert(tried.match(Success({ x: 1, y: { z: 2 } })));
+
+    return asserts.done();
+  }
 
   public function formField() {
     var o:{
@@ -246,4 +269,14 @@ abstract Timezone(Second) {
 abstract Second(Float) {
   public function new(v) this = v;
   public inline function toFloat() return this;
+}
+
+class CountingNormalizer<Input, Output> implements Normalizer<Input, Output> {
+  public var calls = 0;
+  final inner = new DefaultNormalizer();
+  public function new() {}
+  public function normalize(input:Iterator<Input>, name:Input->String, value:Input->Output) {
+    calls++;
+    return inner.normalize(input, name, value);
+  }
 }

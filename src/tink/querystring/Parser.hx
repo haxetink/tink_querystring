@@ -1,6 +1,8 @@
 package tink.querystring;
 
 import tink.core.Error.Pos;
+import tink.querystring.Normalizer;
+import tink.querystring.Normalizer.DefaultNormalizer;
 
 using tink.CoreApi;
 
@@ -23,19 +25,21 @@ class ParserBase<Input, Value, Result> {
     }
   }
   
-  function init<A>(input:Iterator<A>, name:A->String, value:A->Value) {
-    this.root = new DefaultNormalizer().normalize(input, name, value);
+  function init<A>(input:Iterator<A>, name:A->String, value:A->Value, ?normalizer:Normalizer<A, Value>) {
+    if (normalizer == null)
+      normalizer = new DefaultNormalizer();
+    this.root = normalizer.normalize(input, name, value);
   }
  
   function abort(e)
     throw error('${e.reason} for ${e.name}');
 
-  public function parse(input:Input):Result 
+  public function parse(input:Input, ?normalizer:Normalizer<Dynamic, Value>):Result 
     return throw Error.withData(NotImplemented, 'not implemented', pos);
     
-  public function tryParse(input)
+  public function tryParse(input:Input, ?normalizer:Normalizer<Dynamic, Value>)
     return 
-      try Success(parse(input))
+      try Success(parse(input, normalizer))
       catch (e:Error) Failure(e)
       catch (e:Dynamic) Failure(error('Parse Error', e));
 
@@ -118,155 +122,5 @@ abstract Tree<V>(Map<String, Field<V>>) from Map<String, Field<V>> to Map<String
       }
     buf.add(indent + '}');
     return buf.toString();
-  }
-}
-
-interface Normalizer<Input, Output> {
-  function normalize(input:Iterator<Input>, name:Input->String, value:Input->Output):Tree<Output>;
-}
-
-class DefaultNormalizer<Input, Output> implements Normalizer<Input, Output> {
-  public function new() {}
-  
-  public function normalize(input:Iterator<Input>, name:Input->String, value:Input->Output):Tree<Output> {
-    final root = new Tree();
-    for(entry in input) iterate(root, name(entry), value(entry));
-    return root;
-  }
-  
-  function iterate(tree:Tree<Output>, key:String, value:Output, depth = 0) {
-    // trace(haxe.Json.stringify(key), 1);
-    if(depth == 0) {
-      if(key == '') throw 'empty key';
-      
-      switch [key.indexOf('['), key.indexOf('.')] {
-        case [-1, -1]:
-          final field = key;
-          
-          switch tree[field] {
-            case null: tree[field] = Value(value);
-            case Value(v) if(v == value): // no-op
-            case v: throw 'conflict: $field is already defined as $v';
-          }
-          
-        case [i, -1] | [-1, i]:
-          final field = key.substr(0, i);
-          
-          final sub = switch tree[field] {
-            case null: 
-              final sub = new Tree();
-              tree[field] = Sub(sub);
-              sub;
-            case Sub(sub):
-              sub;
-            case v:
-              throw 'conflict: $field is already defined as $v';
-          }
-          iterate(sub, key.substr(i), value, depth + 1);
-          
-        case [i, j]:
-          // TODO: DRY
-          final index = i > j ? j : i;
-          final field = key.substr(0, index);
-          
-          final sub = switch tree[field] {
-            case null: 
-              final sub = new Tree();
-              tree[field] = Sub(sub);
-              sub;
-            case Sub(sub):
-              sub;
-            case v:
-              throw 'conflict: $field is already defined as $v';
-          }
-          iterate(sub, key.substr(index), value, depth + 1);
-      }
-      
-    } else {
-      final bracket = key.charCodeAt(0) == '['.code;
-      
-      if(bracket) {
-        switch [key.indexOf(']['), key.indexOf('].')] {
-          case [-1, -1]:
-            final field = key.substring(1, key.length - 1);
-            switch tree[field] {
-              case null: tree[field] = Value(value);
-              case v: throw 'conflict: $field is already defined as $v';
-            }
-            
-          case [i, -1] | [-1, i]:
-            final field = key.substring(1, i);
-            
-            final sub = switch tree[field] {
-              case null: 
-                final sub = new Tree();
-                tree[field] = Sub(sub);
-                sub;
-              case Sub(sub):
-                sub;
-              case v:
-                throw 'conflict: $field is already defined as $v';
-            }
-            iterate(sub, key.substr(i + 1), value, depth + 1);
-            
-          case [i, j]:
-            final index = i > j ? j : i;
-            final field = key.substring(1, index);
-            
-            final sub = switch tree[field] {
-              case null: 
-                final sub = new Tree();
-                tree[field] = Sub(sub);
-                sub;
-              case Sub(sub):
-                sub;
-              case v:
-                throw 'conflict: $field is already defined as $v';
-            }
-            iterate(sub, key.substr(index + 1), value, depth + 1);
-        }
-      } else {
-        switch [key.indexOf('['), key.indexOf('.', 1)] {
-          case [-1, -1]:
-            final field = key.substr(1);
-            switch tree[field] {
-              case null: tree[field] = Value(value);
-              case v: throw 'conflict: $field is already defined as $v';
-            }
-            
-          case [i, -1] | [-1, i]:
-            final field = key.substring(1, i);
-            
-            final sub = switch tree[field] {
-              case null: 
-                final sub = new Tree();
-                tree[field] = Sub(sub);
-                sub;
-              case Sub(sub):
-                sub;
-              case v:
-                throw 'conflict: $field is already defined as $v';
-            }
-            iterate(sub, key.substr(i), value, depth + 1);
-            
-          case [i, j]:
-            final index = i > j ? j : i;
-            final field = key.substring(1, index);
-            
-            final sub = switch tree[field] {
-              case null: 
-                final sub = new Tree();
-                tree[field] = Sub(sub);
-                sub;
-              case Sub(sub):
-                sub;
-              case v:
-                throw 'conflict: $field is already defined as $v';
-            }
-            iterate(sub, key.substr(index), value, depth + 1);
-        }
-      }
-      
-    }
   }
 }

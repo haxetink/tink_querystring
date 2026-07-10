@@ -1,6 +1,7 @@
 package;
 
-import tink.querystring.Parser;
+import tink.querystring.Normalizer.DefaultNormalizer;
+import tink.querystring.Parser.Field;
 
 using tink.CoreApi;
 
@@ -23,19 +24,19 @@ class NormalizerTest {
     final tree = normalizer.normalize(entries.iterator(), e -> e.name, e -> e.value);
     
     asserts.compare([
-      'foo' => Sub([
-        'bar' => Value('1'),
-        'baz' => Value('2'),
-        'deep' => Sub([
-          '1' => Value('3'),
-          '2' => Value('4'),
-          '3' => Value('5'),
-          '4' => Value('6'),
+      'foo' => Field.Sub([
+        'bar' => Field.Value('1'),
+        'baz' => Field.Value('2'),
+        'deep' => Field.Sub([
+          '1' => Field.Value('3'),
+          '2' => Field.Value('4'),
+          '3' => Field.Value('5'),
+          '4' => Field.Value('6'),
         ]),
-        '3' => Sub([
-          'y' => Sub([
-            '1' => Sub([
-              'i' => Value('7')
+        '3' => Field.Sub([
+          'y' => Field.Sub([
+            '1' => Field.Sub([
+              'i' => Field.Value('7')
             ])
           ])
         ])

@@ -35,8 +35,8 @@ The `tink.QueryString.parse` macro is really just a helper for generating a `tin
   
 ```haxe
 class ParserBase<Input, Value, Result> {
-  public function parse(input:Input):Result;  
-  public function tryParse(input:Input):Outcome<Result, Error>;
+  public function parse(input:Input, ?normalizer:Normalizer<Dynamic, Value>):Result;  
+  public function tryParse(input:Input, ?normalizer:Normalizer<Dynamic, Value>):Outcome<Result, Error>;
 }
 ```
 
@@ -45,10 +45,24 @@ To fully specify a parser type, you would use `Parser<Input->Value->Result>`, wh
 So in the above example above, we could explicitly do everything by hand like so:
   
 ```haxe
-var parser = tink.querystring.Parser<tink.querystring.Pairs<tink.url.Portion>->Portion->Post>();
+var parser = new tink.querystring.Parser<tink.querystring.Pairs<tink.url.Portion>->Portion->Post>();
 parser.parse('title=Example+Post&body=This+is+an+example&tags[0]=foo&tags[1]=bar');
 ```
 
+#### Key flavour (Normalizer)
+
+Nested keys may use mixed dot and bracket notation (`y.z=2` and `y[z]=2` are both accepted). That decomposition is done by a `Normalizer` — by default `DefaultNormalizer`.
+
+`Keymaker` only affects **building**. On the parser side, pass an optional normalizer to `parse` / `tryParse` (the `QueryString.parse` facade does not take one — use `Parser<T>` directly):
+
+```haxe
+var parser = new Parser<Post>();
+parser.parse(qs); // DefaultNormalizer
+parser.parse(qs, new DefaultNormalizer());
+parser.tryParse(qs, new DefaultNormalizer());
+```
+
+Custom `Normalizer` implementations can change how flat keys become a tree (for example to enforce a single key flavour).
 # Building
 
 ## Simple Building

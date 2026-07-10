@@ -119,8 +119,8 @@ class GenParser {
       function getName(p:tink.core.Named<$value>):String return p.name;
       function getValue(p:tink.core.Named<$value>):$value return p.value;
 
-      override public function parse(input:$input) {
-        this.init(input, getName, getValue);
+      override public function parse(input:$input, ?normalizer:tink.querystring.Normalizer<Dynamic, $value>) {
+        this.init(input, getName, getValue, cast normalizer);
         final name = '';
         final field = tink.querystring.Parser.Field.Sub(root);
         return ${crawl.expr};
